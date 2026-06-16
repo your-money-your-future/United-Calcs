@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CBUS Strategic Projection - 2026 Data</title>
+    <title>Superannuation Strategic Projection - 2026 Data</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; padding: 20px; color: #2c3e50; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid #004a99; }
@@ -36,9 +36,9 @@
 
 <div class="container">
     <div class="header-area">
-        <h1 style="margin-bottom: 5px; color: #004a99;">🏗️ CBUS Strategic Projection</h1>
+        <h1 style="margin-bottom: 5px; color: #004a99;">🏗️ Superannuation Strategic Projection</h1>
         <div class="disclaimer">
-            Investment performance to 31 March 2026.<br>
+            Investment performance to 31 May 2026.<br>
             Past performance is not a reliable indicator of future performance.
         </div>
     </div>
@@ -97,7 +97,7 @@
         <div class="breakdown-panel">
             <div class="breakdown-grid">
                 <div>
-                    <span class="stat-label">Total Annual Concessional (under $30k Cap)</span>
+                    <span class="stat-label">Total Annual Concessional (under $32,500 Cap)</span>
                     <span class="stat" id="dispConc">$0</span>
                 </div>
                 <div>
@@ -106,31 +106,27 @@
                 </div>
             </div>
             <p id="capWarning" style="color:#e53e3e; font-size:11px; margin-top:10px; text-align:center; display:none; font-weight:bold;">
-                ⚠️ ALERT: Combined contributions exceed the $30,000 cap. Excess is treated as Non-Concessional.
+                ⚠️ ALERT: Combined contributions exceed the $32,500 cap. Excess is treated as Non-Concessional.
             </p>
         </div>
 
-        <div class="input-box" style="grid-column: span 2;">
+        <div class="input-box">
+            <label>Select Superannuation Fund</label>
+            <select id="fundSelect" onchange="populateStrategies()">
+                <option value="cbus">Cbus</option>
+                <option value="art">Australian Retirement Trust</option>
+                <option value="ausSuper">AustralianSuper</option>
+                <option value="aware">Aware Super</option>
+                <option value="brighter">Brighter Super</option>
+                <option value="bussq">BUSSQ Super</option>
+                <option value="hostplus">Hostplus</option>
+                <option value="plum">Plum</option>
+            </select>
+        </div>
+
+        <div class="input-box">
             <label>Investment Option (Sorted by Performance Record)</label>
-            <select id="strategy">
- <optgroup label="10 Year Record">
-  <option value="0.082200">Growth (MySuper) - 7.74%</option>
-  <option value="0.100300">High Growth - 9.42%</option>
-  <option value="0.044900">Conservative - 4.3%</option>
-  <option value="0.019600">Cash - 1.99%</option>
- </optgroup>
- <optgroup label="5 Year Record">
-  <option value="0.053500">Conservative Growth - 4.74%</option>
- </optgroup>
- <optgroup label="3 Year Record">
-  <option value="0.098700">Growth Plus - 8.47%</option>
-  <option value="0.107300">Indexed Diversified - 9.39%</option>
-  <option value="0.166500">Overseas Shares - 13.06%</option>
-  <option value="0.092100">Australian Shares - 8.1%</option>
-  <option value="0.018000">Property - 3.01%</option>
-  <option value="0.041400">Diversified Fixed Interest - 3.86%</option>
- </optgroup>
-</select>
+            <select id="strategy"></select>
         </div>
     </div>
 
@@ -157,8 +153,170 @@
 <script>
     let sgMode = 'pct';
     let ssMode = 'pct';
-    const CONC_CAP = 30000;
+    const CONC_CAP = 32500;
     const curr = (n) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(n);
+
+    const fundData = {
+        cbus: `
+            <optgroup label="10 Year Record">
+                <option value="0.078900">Growth (MySuper) - 7.89%</option>
+                <option value="0.095100">High Growth - 9.51%</option>
+                <option value="0.043300">Conservative - 4.33%</option>
+                <option value="0.020200">Cash - 2.02%</option>
+            </optgroup>
+            <optgroup label="5 Year Record">
+                <option value="0.049800">Conservative Growth - 4.98%</option>
+            </optgroup>
+            <optgroup label="3 Year Record">
+                <option value="0.100700">Growth Plus - 10.07%</option>
+                <option value="0.110400">Indexed Diversified - 11.04%</option>
+                <option value="0.147700">Overseas Shares - 14.77%</option>
+                <option value="0.097000">Australian Shares - 9.70%</option>
+                <option value="0.045300">Property - 4.53%</option>
+                <option value="0.044100">Diversified Fixed Interest - 4.41%</option>
+            </optgroup>
+        `,
+        art: `
+            <optgroup label="10 Year Record">
+                <option value="0.098600">High Growth - 9.86%</option>
+                <option value="0.085100">Balanced - 8.51%</option>
+                <option value="0.066400">Conservative Balanced - 6.64%</option>
+                <option value="0.048700">Conservative - 4.87%</option>
+                <option value="0.061600">Balance Risk Adjusted - 6.16%</option>
+                <option value="0.075600">Socially Conscious Balanced - 7.56%</option>
+                <option value="0.078200">Balanced Index - 7.82%</option>
+                <option value="0.092800">Australian Shares Index - 9.28%</option>
+                <option value="0.117800">International Shares Hedged Index - 11.78%</option>
+                <option value="0.121300">International Shares Unhedged Index - 12.13%</option>
+                <option value="0.065400">Listed Property Index - 6.54%</option>
+                <option value="0.013600">Bonds Index - 1.36%</option>
+                <option value="0.023000">Cash - 2.30%</option>
+            </optgroup>
+            <optgroup label="7 Year Record">
+                <option value="0.078000">Unlisted Assets - 7.80%</option>
+            </optgroup>
+            <optgroup label="1 Year Record">
+                <option value="0.130900">High Growth Index - 13.09%</option>
+            </optgroup>
+        `,
+        ausSuper: `
+            <optgroup label="10 Year Record">
+                <option value="0.079400">Balanced - 7.94%</option>
+                <option value="0.088400">High Growth - 8.84%</option>
+                <option value="0.071300">Socially Aware - 7.13%</option>
+                <option value="0.076100">Indexed Diversified - 7.61%</option>
+                <option value="0.062300">Conservative Balanced - 6.23%</option>
+                <option value="0.047500">Stable - 4.75%</option>
+                <option value="0.099300">Australian Shares - 9.93%</option>
+                <option value="0.110200">International Shares - 11.02%</option>
+                <option value="0.021600">Diversified Fixed Interest - 2.16%</option>
+                <option value="0.020300">Cash - 2.03%</option>
+            </optgroup>
+        `,
+        aware: `
+            <optgroup label="10 Year Record">
+                <option value="0.092900">High Growth - 9.29%</option>
+                <option value="0.079500">Balanced - 7.95%</option>
+                <option value="0.084300">Balanced Socially Conscious - 8.43%</option>
+                <option value="0.063000">Conservative Balanced - 6.30%</option>
+                <option value="0.050700">Conservative - 5.07%</option>
+                <option value="0.039900">Defensive - 3.99%</option>
+                <option value="0.093200">Australian Shares - 9.32%</option>
+                <option value="0.124000">International Shares - 12.40%</option>
+                <option value="0.058300">Property - 5.83%</option>
+                <option value="0.023100">Cash - 2.31%</option>
+            </optgroup>
+            <optgroup label="3 Year Record">
+                <option value="0.119400">High Growth Socially Conscious - 11.94%</option>
+                <option value="0.136600">High Growth Indexed - 13.66%</option>
+                <option value="0.119800">Balanced Indexed - 11.98%</option>
+                <option value="0.027500">Bonds - 2.75%</option>
+            </optgroup>
+        `,
+        brighter: `
+            <optgroup label="10 Year Record">
+                <option value="0.076400">My Super - 7.64%</option>
+                <option value="0.096900">Growth - 9.69%</option>
+                <option value="0.085000">Balanced - 8.50%</option>
+                <option value="0.066300">Conservative Balanced - 6.63%</option>
+                <option value="0.049700">Stable - 4.97%</option>
+                <option value="0.029800">Secure - 2.98%</option>
+                <option value="0.093800">Australian Shares - 9.38%</option>
+                <option value="0.135700">International Shares - 13.57%</option>
+                <option value="0.051300">Property - 5.13%</option>
+                <option value="0.018000">Diversified Fixed Interest - 1.80%</option>
+                <option value="0.023300">Cash - 2.33%</option>
+            </optgroup>
+            <optgroup label="7 Year Record">
+                <option value="0.082600">Indexed Balanced - 8.26%</option>
+            </optgroup>
+        `,
+        bussq: `
+            <optgroup label="10 Year Record">
+                <option value="0.067000">Balanced Growth - 6.70%</option>
+                <option value="0.020000">Cash - 2.00%</option>
+                <option value="0.042300">Defensive - 4.23%</option>
+                <option value="0.077100">High Growth - 7.71%</option>
+                <option value="0.078800">Australian Shares - 7.88%</option>
+                <option value="0.083000">International Shares - 8.30%</option>
+                <option value="0.088700">Australian Small Company Shares - 8.87%</option>
+                <option value="0.071300">International (Emg Mkts) Shares - 7.13%</option>
+            </optgroup>
+        `,
+        hostplus: `
+            <optgroup label="10 Year Record">
+                <option value="0.098000">Growth - 9.80%</option>
+                <option value="0.086700">Balanced - 8.67%</option>
+                <option value="0.066700">Conservative - 6.67%</option>
+                <option value="0.047400">Stable - 4.74%</option>
+                <option value="0.084000">Indexed Balanced - 8.40%</option>
+                <option value="0.021100">Cash - 2.11%</option>
+                <option value="0.019900">Bonds - 1.99%</option>
+                <option value="0.091000">Australian Shares - 9.10%</option>
+                <option value="0.117300">International Shares - 11.73%</option>
+            </optgroup>
+            <optgroup label="7 Year Record">
+                <option value="0.081100">SRI - Balanced - 8.11%</option>
+                <option value="0.130900">International Shares - Indexed - 13.09%</option>
+            </optgroup>
+            <optgroup label="3 Year Record">
+                <option value="0.029500">Bonds – Indexed - 2.95%</option>
+                <option value="0.107900">Australian Shares – Indexed - 10.79%</option>
+            </optgroup>
+            <optgroup label="1 Year Record">
+                <option value="0.125500">High Growth - 12.55%</option>
+                <option value="0.045800">Defensive - 4.58%</option>
+                <option value="0.135600">Indexed High Growth - 13.56%</option>
+                <option value="0.133600">Indexed Growth - 13.36%</option>
+                <option value="0.088800">Indexed Conservative - 8.88%</option>
+                <option value="0.067500">Indexed Stable - 6.75%</option>
+                <option value="0.046100">Indexed Defensive - 4.61%</option>
+                <option value="0.114000">SRI - High Growth - 11.40%</option>
+                <option value="0.041500">SRI - Defensive - 4.15%</option>
+            </optgroup>
+        `,
+        plum: `
+            <optgroup label="10 Year Record">
+                <option value="0.076000">MySuper Growth Portfolio^ - 7.60%</option>
+                <option value="0.115000">MLC Aggressive - 11.50%</option>
+                <option value="0.095000">MLC High Growth - 9.50%</option>
+                <option value="0.083000">MLC Growth - 8.30%</option>
+                <option value="0.074000">MLC Balanced - 7.40%</option>
+                <option value="0.060000">MLC Conservative Balanced - 6.00%</option>
+                <option value="0.044000">MLC Stable - 4.40%</option>
+            </optgroup>
+            <optgroup label="5 Year Record">
+                <option value="0.054000">MySuper Conservative Balanced Portfolio - 5.40%</option>
+                <option value="0.026000">MySuper Cash Portfolio - 2.60%</option>
+            </optgroup>
+        `
+    };
+
+    function populateStrategies() {
+        const selectedFund = document.getElementById('fundSelect').value;
+        const strategySelect = document.getElementById('strategy');
+        strategySelect.innerHTML = fundData[selectedFund];
+    }
 
     function setSGMode(mode) {
         sgMode = mode;
@@ -253,6 +411,8 @@
         document.getElementById('results').style.display = 'block';
     }
 
+    // Initialize layout options
+    populateStrategies();
     updateBreakdown();
 </script>
 </body>
