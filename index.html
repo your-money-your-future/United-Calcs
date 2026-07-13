@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBUS Calculator Dashboard</title>
+    <title>Superannuation Calculator Dashboard</title>
     <style>
         :root { --cbus: #009354; } 
         
@@ -44,29 +44,29 @@
 
 <div id="auth-overlay">
     <div class="pin-box">
-        <h3 style="margin-top:0; color: var(--cbus);">Secure Access</h3>
+        <h3 style="margin-top:0; color: var(--);">Secure Access</h3>
         <p style="font-size: 13px; color: #666;">Enter Admin PIN to continue</p>
         <input type="password" id="pin-entry" class="pin-input" maxlength="8" placeholder="••••••••">
         <br>
-        <button onclick="checkPin()" style="background: var(--cbus); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">Unlock Dashboard</button>
+        <button onclick="checkPin()" style="background: var(--); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">Unlock Dashboard</button>
         <div id="pin-error" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Incorrect PIN</div>
     </div>
 </div>
 
 <div id="main-content" style="display:none; width: 100%; max-width: 500px;">
     <div class="container">
-        <h1>CBUS Calculators</h1>
+        <h1>Superannuation Calculators</h1>
         
         <div class="section-label">Retirement Tools</div>
         <div class="grid">
-            <a href="calculators/Retirement/CBUS Super Retirement Calculator.html" class="card">
+            <a href="calculators/Retirement/Superannuation Retirement Calculator.html" class="card">
                 👴 Super Retirement Calculator
             </a>
         </div>
 
         <div class="section-label">Investment Tools</div>
         <div class="grid">
-            <a href="calculators/Accumulation/CBUS Investment Calculator.html" class="card">
+            <a href="calculators/Accumulation/Superannuation Investment Calculator.html" class="card">
                 📈 Investment Calculator
             </a>
         </div>
