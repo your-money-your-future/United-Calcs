@@ -258,7 +258,7 @@
         let currentFixedSGAmt = (sgMode === 'dol') ? sgVal : 0;
         const inflationRate = 0.025;
 
-        for (let i = 0; i <= (retAge - age); i++) {
+        for (let i = 0; i < (retAge - age); i++) {
             // Apply frequency and wage growth to fixed dollar SG
             let annualSG = (sgMode === 'pct') ? (annualSal * (sgVal / 100)) : (currentFixedSGAmt * freq);
             let annualSS = (ssMode === 'pct') ? (annualSal * (ssVal / 100)) : (ssVal * freq);
