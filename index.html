@@ -4,88 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Superannuation Calculator Dashboard</title>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --cbus: #009354; } 
-        
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
         
-        /* PIN Security Overlay */
+        /* Auth Overlay */
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240, 244, 247, 0.98); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .pin-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cbus); }
-        .pin-input { font-size: 24px; width: 120px; text-align: center; letter-spacing: 8px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin: 15px 0; outline: none; }
+        .pin-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cbus); width: 280px; }
+        .auth-input { font-size: 16px; width: 90%; text-align: center; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin: 8px 0; outline: none; }
+        .btn { background: var(--cbus); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-secondary { background: #666; font-size: 12px; padding: 6px 12px; margin-top: 8px; }
         
         /* Dashboard Container */
         .container { max-width: 500px; width: 100%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { color: #1a1a1a; text-align: center; font-size: 24px; margin-bottom: 25px; }
+        h1 { color: #1a1a1a; text-align: center; font-size: 24px; margin-bottom: 20px; }
+        .user-bar { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
         .section-label { font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase; margin: 20px 0 10px 5px; letter-spacing: 1px; }
         .grid { display: grid; gap: 12px; }
-        .card { 
-            padding: 18px; border: 1px solid #e1e4e8; border-radius: 10px; 
-            text-decoration: none; color: var(--cbus); font-weight: 500;
-            transition: all 0.2s ease; background: #fff; display: block;
-        }
+        .card { padding: 18px; border: 1px solid #e1e4e8; border-radius: 10px; text-decoration: none; color: var(--cbus); font-weight: 500; transition: all 0.2s ease; background: #fff; display: block; }
         .card:hover { background: var(--cbus); color: white; border-color: var(--cbus); transform: translateY(-2px); }
     </style>
-    <script>
-        function checkPin() {
-            const pin = document.getElementById('pin-entry').value;
-            const correctPin = "01071984";
-            if (pin === correctPin) {
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-            } else {
-                document.getElementById('pin-error').style.display = 'block';
-                document.getElementById('pin-entry').value = '';
-            }
-        }
-    </script>
 </head>
 <body>
 
+<!-- Auth Box -->
 <div id="auth-overlay">
     <div class="pin-box">
-        <h3 style="margin-top:0; color: var(--);">Secure Access</h3>
-        <p style="font-size: 13px; color: #666;">Enter Admin PIN to continue</p>
-        <input type="password" id="pin-entry" class="pin-input" maxlength="8" placeholder="••••••••">
-        <br>
-        <button onclick="checkPin()" style="background: var(--); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">Unlock Dashboard</button>
-        <div id="pin-error" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Incorrect PIN</div>
+        <h3 style="margin-top:0; color: var(--cbus);">Secure Access</h3>
+        <p style="font-size: 13px; color: #666;">Sign in to access tools</p>
+        <input type="email" id="email-entry" class="auth-input" placeholder="User Email">
+        <input type="password" id="pin-entry" class="auth-input" placeholder="PIN / Password" onkeydown="if(event.key==='Enter') login()">
+        <button onclick="login()" class="btn">Sign In</button>
+        <div id="auth-error" style="color: red; font-size: 12px; margin-top: 10px; display: none;"></div>
     </div>
 </div>
 
+<!-- Main Content -->
 <div id="main-content" style="display:none; width: 100%; max-width: 500px;">
     <div class="container">
         <h1>Superannuation Calculators</h1>
         
+        <div class="user-bar">
+            <span id="user-display">Logged in</span>
+            <div>
+                <button onclick="changePinPrompt()" class="btn-secondary" style="margin-right:4px;">Change PIN</button>
+                <button onclick="logout()" class="btn-secondary">Sign Out</button>
+            </div>
+        </div>
+        
         <div class="section-label">Retirement Tools</div>
         <div class="grid">
-            <a href="calculators/Retirement/Superannuation Retirement Calculator.html" class="card">
-                👴 Super Retirement Calculator
-            </a>
+            <a href="calculators/Retirement/Superannuation Retirement Calculator.html" class="card">👵 Super Retirement Calculator</a>
         </div>
 
         <div class="section-label">Investment Tools</div>
         <div class="grid">
-            <a href="calculators/Accumulation/Superannuation Investment Calculator.html" class="card">
-                📈 Investment Calculator
-            </a>
-        </div>
-
-        <div class="section-label">Investment Tools</div>
-        <div class="grid">
-            <a href="calculators/Accumulation/Superannuation Investment Calculator Delayed Extra Contributions.html" class="card">
-                📈 Investment Calculator with Delayed Extra Contributions 
-            </a>
+            <a href="calculators/Accumulation/Superannuation Investment Calculator.html" class="card">📈 Investment Calculator</a>
+            <a href="calculators/Accumulation/Superannuation Investment Calculator Delayed Extra Contributions.html" class="card">📈 Investment Calculator with Delayed Extra Contributions</a>
         </div>
         
         <div class="section-label">Comparison Tools</div>
         <div class="grid">
-            <a href="calculators/Comparison/Fund Comparison.html" class="card">
-                ⚖️ Fund Comparison
-            </a>
+            <a href="calculators/Comparison/Fund Comparison.html" class="card">⚖️ Fund Comparison</a>
         </div>
     </div>
 </div>
+
+<script>
+    // --- REPLACE WITH YOUR SUPABASE CREDENTIALS ---
+    const SUPABASE_URL = "https://uiwgfqxslleyzxaadigg.supabase.co/rest/v1/";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd2dmcXhzbGxleXp4YWFkaWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNjM5NzgsImV4cCI6MjEwMjczOTk3OH0.OjqfP6vzpCYv2yCOPq13Sn6X8lPaSbpJMW-mohfLL5Y";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Check Session on Load
+    window.onload = async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            showDashboard(session.user);
+        }
+    };
+
+    async function login() {
+        const email = document.getElementById('email-entry').value;
+        const password = document.getElementById('pin-entry').value;
+        const errorDiv = document.getElementById('auth-error');
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+        if (error) {
+            errorDiv.innerText = error.message;
+            errorDiv.style.display = 'block';
+        } else {
+            showDashboard(data.user);
+        }
+    }
+
+    function showDashboard(user) {
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('user-display').innerText = user.email;
+    }
+
+    async function logout() {
+        await supabaseClient.auth.signOut();
+        window.location.reload();
+    }
+
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+            const newPin = prompt("Enter your new 8-digit PIN / Password:");
+            if (newPin && newPin.length >= 6) {
+                const { error } = await supabaseClient.auth.updateUser({ password: newPin });
+                if (error) {
+                    alert("Error resetting PIN: " + error.message);
+                } else {
+                    alert("PIN updated successfully! You can now log in with your new PIN.");
+                    window.location.href = window.location.pathname;
+                }
+            } else {
+                alert("PIN must be at least 6 characters long.");
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
