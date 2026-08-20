@@ -15,7 +15,7 @@
         .pin-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cbus); width: 280px; }
         .auth-input { font-size: 16px; width: 90%; text-align: center; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin: 8px 0; outline: none; }
         .btn { background: var(--cbus); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        .btn-secondary { background: #666; font-size: 12px; padding: 6px 12px; margin-top: 8px; }
+        .btn-secondary { background: #666; color: white; border: none; font-size: 12px; padding: 6px 12px; margin-top: 8px; border-radius: 6px; cursor: pointer; }
         
         /* Dashboard Container */
         .container { max-width: 500px; width: 100%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
@@ -73,7 +73,7 @@
 </div>
 
 <script>
-    // --- REPLACE WITH YOUR SUPABASE CREDENTIALS ---
+    // --- SUPABASE CREDENTIALS (CLEANED URL) ---
     const SUPABASE_URL = "https://uiwgfqxslleyzxaadigg.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd2dmcXhzbGxleXp4YWFkaWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNjM5NzgsImV4cCI6MjEwMjczOTk3OH0.OjqfP6vzpCYv2yCOPq13Sn6X8lPaSbpJMW-mohfLL5Y";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -110,6 +110,17 @@
     async function logout() {
         await supabaseClient.auth.signOut();
         window.location.reload();
+    }
+
+    async function changePinPrompt() {
+        const newPin = prompt("Enter your new 8-digit PIN / Password:");
+        if (newPin && newPin.length >= 6) {
+            const { error } = await supabaseClient.auth.updateUser({ password: newPin });
+            if (error) alert("Error updating PIN: " + error.message);
+            else alert("PIN updated successfully!");
+        } else if (newPin) {
+            alert("PIN must be at least 6 characters long.");
+        }
     }
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
