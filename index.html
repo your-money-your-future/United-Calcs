@@ -124,7 +124,7 @@
     }
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
+        if (event === 'INVITE' || event === 'PASSWORD_RECOVERY') {
             const newPin = prompt("Enter your new 8-digit PIN / Password:");
             if (newPin && newPin.length >= 6) {
                 const { error } = await supabaseClient.auth.updateUser({ password: newPin });
