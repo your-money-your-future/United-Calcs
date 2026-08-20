@@ -3,6 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Strategic Wealth Projection 2026 - Updated Data</title>
+
+    <!-- Supabase JS Client & Auth Guard -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://uiwgfqxslleyzxaadigg.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd2dmcXhzbGxleXp4YWFkaWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNjM5NzgsImV4cCI6MjEwMjczOTk3OH0.OjqfP6vzpCYv2yCOPq13Sn6X8lPaSbpJMW-mohfLL5Y";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Verify session before loading tool contents
+        (async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                // Redirect unauthorized users back to the index page login
+                window.location.href = "../../index.html"; 
+            }
+        })();
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -20,6 +38,9 @@
         .logo-placeholder { font-size: 32px; font-weight: 900; color: var(--cbus-navy); letter-spacing: -1px; margin-bottom: 10px; }
         .logo-placeholder span { color: var(--cbus-green); }
         
+        .back-nav { display: inline-block; margin-bottom: 15px; text-decoration: none; color: var(--cbus-navy); font-weight: bold; font-size: 14px; }
+        .back-nav:hover { text-decoration: underline; }
+
         .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; background: #fff; border: 1px solid #e2e8f0; padding: 25px; border-radius: 12px; }
         .input-box label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--cbus-navy); text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
@@ -46,6 +67,8 @@
 <body>
 
 <div class="container">
+    <a href="../../index.html" class="back-nav">← Back to Dashboard</a>
+
     <div class="header">
         <div class="logo-placeholder">STRATEGIC <span>COMPARISON</span></div>
         <p>Projected Wealth Analysis based on Data Verified as of 31 May 2026</p>
