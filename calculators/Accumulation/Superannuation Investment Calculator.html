@@ -3,6 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Superannuation Strategic Projection - 2026 Data</title>
+
+    <!-- Supabase JS Client & Auth Guard -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://uiwgfqxslleyzxaadigg.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd2dmcXhzbGxleXp4YWFkaWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNjM5NzgsImV4cCI6MjEwMjczOTk3OH0.OjqfP6vzpCYv2yCOPq13Sn6X8lPaSbpJMW-mohfLL5Y";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Verify session before loading tool contents
+        (async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                // Redirect unauthorized users back to the index page login
+                window.location.href = "../../index.html"; 
+            }
+        })();
+    </script>
+
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; padding: 20px; color: #2c3e50; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid #004a99; }
@@ -13,6 +31,9 @@
         
         .header-area { text-align: center; margin-bottom: 25px; }
         .disclaimer { font-size: 12px; color: #666; font-style: italic; margin-bottom: 20px; text-align: center; line-height: 1.4; }
+
+        .back-nav { display: inline-block; margin-bottom: 15px; text-decoration: none; color: #004a99; font-weight: bold; font-size: 14px; }
+        .back-nav:hover { text-decoration: underline; }
 
         .breakdown-panel { grid-column: span 2; background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center; }
@@ -35,6 +56,8 @@
 <body>
 
 <div class="container">
+    <a href="../../index.html" class="back-nav">← Back to Dashboard</a>
+
     <div class="header-area">
         <h1 style="margin-bottom: 5px; color: #004a99;">🏗️ Superannuation Strategic Projection</h1>
         <div class="disclaimer">
