@@ -51,7 +51,7 @@
 
     <h2>🏗️ Cbus Retirement Income Projection</h2>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 20px;">
-        Investment performance to 30 June 2026. Past performance is not a reliable indicator of future performance.
+        Investment performance to 31 July 2026. Past performance is not a reliable indicator of future performance.
     </p>
 
     <div class="grid">
@@ -121,42 +121,49 @@
 </div>
 
 <script>
+    // Configured exclusively with CBUS TTR and CBUS Fully Retired returns as of 31 Jul 26 using their longest historical period.
     const investmentData = {
-  retired: {
-    10: [
-        { name: "High Growth", rate: 0.1088 },
-        { name: "Growth", rate: 0.0897 },
-        { name: "Conservative Growth (Default)", rate: 0.0701 },
-        { name: "Conservative", rate: 0.0486 },
-        { name: "Cash", rate: 0.0241 }
-    ],
-    3: [
-        { name: "Overseas Shares", rate: 0.1610 },
-        { name: "Indexed Diversified", rate: 0.1219 },
-        { name: "Growth Plus", rate: 0.1084 },
-        { name: "Australian Shares", rate: 0.1041 },
-        { name: "Diversified Fixed Interest", rate: 0.0554 },
-        { name: "Property", rate: 0.0572 }
-    ]
-  },
-  ttr: {
-    7: [
-        { name: "High Growth", rate: 0.0904 },
-        { name: "Growth", rate: 0.0742 },
-        { name: "Conservative Growth (Default)", rate: 0.0553 },
-        { name: "Conservative", rate: 0.0379 },
-        { name: "Cash", rate: 0.0225 }
-    ],
-    3: [
-        { name: "Overseas Shares", rate: 0.1480 },
-        { name: "Indexed Diversified", rate: 0.1077 },
-        { name: "Growth Plus", rate: 0.1005 },
-        { name: "Australian Shares", rate: 0.0940 },
-        { name: "Diversified Fixed Interest", rate: 0.0471 },
-        { name: "Property", rate: 0.0531 }
-    ]
-  }
-};
+        retired: {
+            streamName: "CBUS Fully Retired 31 Jul 26",
+            10: [
+                { name: "High Growth", rate: 0.1050 },
+                { name: "Growth", rate: 0.0873 },
+                { name: "Conservative Growth (default)", rate: 0.0684 },
+                { name: "Conservative", rate: 0.0475 },
+                { name: "Cash", rate: 0.0244 }
+            ],
+            7: [
+                { name: "Diversified Fixed Interest", rate: 0.0536 }
+            ],
+            5: [
+                { name: "Overseas Shares", rate: 0.1524 },
+                { name: "Australian Shares", rate: 0.0998 }
+            ],
+            3: [
+                { name: "Indexed Diversified", rate: 0.1161 },
+                { name: "Growth Plus", rate: 0.1031 },
+                { name: "Property", rate: 0.0561 }
+            ]
+        },
+        ttr: {
+            streamName: "CBUS TTR 31 Jul 26",
+            7: [
+                { name: "High Growth", rate: 0.1037 },
+                { name: "Growth", rate: 0.0729 },
+                { name: "Conservative Growth (default)", rate: 0.0725 },
+                { name: "Conservative", rate: 0.0333 },
+                { name: "Cash", rate: 0.0228 }
+            ],
+            3: [
+                { name: "Overseas Shares", rate: 0.1402 },
+                { name: "Indexed Diversified", rate: 0.1026 },
+                { name: "Growth Plus", rate: 0.0963 },
+                { name: "Australian Shares", rate: 0.0898 },
+                { name: "Property", rate: 0.0513 },
+                { name: "Diversified Fixed Interest", rate: 0.0456 }
+            ]
+        }
+    };
 
     function toggleIncomeInput() {
         const type = document.getElementById('incomeType').value;
@@ -179,35 +186,38 @@
     }
 
     function updateInvestmentOptions() {
-  const type = document.getElementById('accountType').value;
-  const strategySelect = document.getElementById('strategy');
-  const grouped = investmentData[type];
+        const type = document.getElementById('accountType').value;
+        const strategySelect = document.getElementById('strategy');
+        const streamInfo = investmentData[type];
 
-  strategySelect.innerHTML = '';
+        strategySelect.innerHTML = '';
 
-  // Longest term first
-  const terms = Object.keys(grouped).map(Number).sort((a, b) => b - a);
+        // Extract terms and sort longest first (e.g., 10, 7, 5, 3)
+        const terms = Object.keys(streamInfo)
+            .filter(key => key !== 'streamName')
+            .map(Number)
+            .sort((a, b) => b - a);
 
-  terms.forEach(term => {
-    const og = document.createElement('optgroup');
-    og.label = `${term} Year Record`;
+        terms.forEach(term => {
+            const og = document.createElement('optgroup');
+            // Format header: e.g., "CBUS TTR 31 Jul 26 — 7 Year Record"
+            og.label = `${streamInfo.streamName} — ${term} Year Record`;
 
-    // Highest return first within the term
-    const items = grouped[term].slice().sort((a, b) => b.rate - a.rate);
+            // Sort options within term by highest return rate first
+            const items = streamInfo[term].slice().sort((a, b) => b.rate - a.rate);
 
-    items.forEach(opt => {
-      const el = document.createElement('option');
-      // Show option name + percentage; keep numeric rate as the value
-      el.textContent = `${opt.name} — ${(opt.rate * 100).toFixed(2)}% p.a.`;
-      el.value = opt.rate;
-      og.appendChild(el);
-    });
+            items.forEach(opt => {
+                const el = document.createElement('option');
+                el.textContent = `${opt.name} — ${(opt.rate * 100).toFixed(2)}% p.a.`;
+                el.value = opt.rate;
+                og.appendChild(el);
+            });
 
-    strategySelect.appendChild(og);
-  });
-}
+            strategySelect.appendChild(og);
+        });
+    }
 
-function getMinDrawdown(age) {
+    function getMinDrawdown(age) {
         if (age < 65) return 0.04;
         if (age < 75) return 0.05;
         if (age < 80) return 0.06;
