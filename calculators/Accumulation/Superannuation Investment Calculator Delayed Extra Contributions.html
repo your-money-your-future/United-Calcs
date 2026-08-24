@@ -61,7 +61,7 @@
     <div class="header-area">
         <h1 style="margin-bottom: 5px; color: #004a99;">🏗️ Superannuation Strategic Projection</h1>
         <div class="disclaimer">
-            Investment performance to 31 July 2026 (or 30 June 2026 as indicated).<br>
+            Investment performance to 30 June 2026.<br>
             Past performance is not a reliable indicator of future performance.
         </div>
     </div>
@@ -125,6 +125,7 @@
             </select>
         </div>
 
+        <!-- NEW: Extra / Lump Sum Contribution Section -->
         <div class="input-box">
             <label>Extra / Lump Sum Contribution Type</label>
             <select id="extraType" onchange="updateBreakdown()">
@@ -163,203 +164,54 @@
         </div>
 
         <div class="input-box" style="grid-column: span 2;">
-            <label>Investment Option (Longest Record Available Per Strategy)</label>
+            <label>Investment Option (Sorted by Performance Record)</label>
             <select id="strategy">
-                <!-- Australian Super (Date: 30 Jun 2026) -->
-                <optgroup label="Australian Super - 30 Jun 26 (10 Year Record)">
-                    <option value="0.084700">Balanced - 8.47% (10 yr)</option>
-                    <option value="0.096400">High Growth - 9.64% (10 yr)</option>
-                    <option value="0.077000">Socially Aware - 7.70% (10 yr)</option>
-                    <option value="0.082700">Indexed Diversified - 8.27% (10 yr)</option>
-                    <option value="0.065600">Conservative Balanced - 6.56% (10 yr)</option>
-                    <option value="0.048500">Stable - 4.85% (10 yr)</option>
-                    <option value="0.105500">Australian Shares - 10.55% (10 yr)</option>
-                    <option value="0.125400">International Shares - 12.54% (10 yr)</option>
-                    <option value="0.020000">Diversified Fixed Interest - 2.00% (10 yr)</option>
-                    <option value="0.021800">Cash - 2.18% (10 yr)</option>
+                <optgroup label="Cbus - 10 Year Record">
+                    <option value="0.081300">Growth (MySuper) - 8.13%</option>
+                    <option value="0.098500">High Growth - 9.85%</option>
+                    <option value="0.043900">Conservative - 4.39%</option>
+                    <option value="0.020400">Cash - 2.04%</option>
                 </optgroup>
-
-                <!-- Aware Super (Date: 31 Jul 2026) -->
-                <optgroup label="Aware Super - 31 Jul 26 (10 Year Record)">
-                    <option value="0.092900">High Growth - 9.29% (10 yr)</option>
-                    <option value="0.079300">Balanced - 7.93% (10 yr)</option>
-                    <option value="0.084900">Balanced Socially Conscious - 8.49% (10 yr)</option>
-                    <option value="0.062700">Conservative Balanced - 6.27% (10 yr)</option>
+                <optgroup label="Cbus - 5 Year Record">
+                    <option value="0.048800">Conservative Growth - 4.88%</option>
                 </optgroup>
-                <optgroup label="Aware Super - 31 Jul 26 (3 Year Record)">
-                    <option value="0.112200">High Growth Socially Conscious - 11.22% (3 yr)</option>
-                    <option value="0.125700">High Growth Indexed - 12.57% (3 yr)</option>
-                    <option value="0.111800">Balanced Indexed - 11.18% (3 yr)</option>
+                <optgroup label="Cbus - 3 Year Record">
+                    <option value="0.101000">Growth Plus - 10.10%</option>
+                    <option value="0.107700">Indexed Diversified - 10.77%</option>
+                    <option value="0.147700">Overseas Shares - 14.77%</option>
+                    <option value="0.093900">Australian Shares - 9.39%</option>
+                    <option value="0.055300">Property - 5.53%</option>
+                    <option value="0.047200">Diversified Fixed Interest - 4.72%</option>
                 </optgroup>
-
-                <!-- Australian Retirement Trust (Date: 31 Jul 2026) -->
-                <optgroup label="Australian Retirement Trust - 31 Jul 26 (10 Year Record)">
-                    <option value="0.050400">Conservative - 5.04% (10 yr)</option>
-                    <option value="0.039500">Defensive - 3.95% (10 yr)</option>
-                    <option value="0.093500">Australian Shares - 9.35% (10 yr)</option>
-                    <option value="0.114700">International Shares - 11.47% (10 yr)</option>
-                    <option value="0.059200">Property - 5.92% (10 yr)</option>
-                    <option value="0.023500">Cash - 2.35% (10 yr)</option>
+                <optgroup label="Cbus Retired - 10 Year Record">
+                    <option value="0.070100">Conservative Growth (Default) - 7.01%</option>
+                    <option value="0.108800">High Growth - 10.88%</option>
+                    <option value="0.089700">Growth - 8.97%</option>
+                    <option value="0.048600">Conservative - 4.86%</option>
+                    <option value="0.024100">Cash - 2.41%</option>
                 </optgroup>
-
-                <!-- Brighter Super (Date: 31 Jul 2026) -->
-                <optgroup label="Brighter Super - 31 Jul 26 (10 Year Record)">
-                    <option value="0.076400">MySuper - 7.64% (10 yr)</option>
-                    <option value="0.093900">Growth - 9.39% (10 yr)</option>
-                    <option value="0.085200">Balanced - 8.52% (10 yr)</option>
-                    <option value="0.062600">Conservative Balanced - 6.26% (10 yr)</option>
-                    <option value="0.078300">Indexed Balanced - 7.83% (10 yr)</option>
-                    <option value="0.044900">Stable - 4.49% (10 yr)</option>
-                    <option value="0.028500">Secure - 2.85% (10 yr)</option>
-                    <option value="0.089700">Australian Shares - 8.97% (10 yr)</option>
-                    <option value="0.139700">International Shares - 13.97% (10 yr)</option>
-                    <option value="0.051500">Property - 5.15% (10 yr)</option>
-                    <option value="0.010000">Diversified Fixed Interest - 1.00% (10 yr)</option>
-                    <option value="0.024900">Cash - 2.49% (10 yr)</option>
+                <optgroup label="Cbus Retired - 3 Year Record">
+                    <option value="0.108400">Growth Plus - 10.84%</option>
+                    <option value="0.121900">Indexed Diversified - 12.19%</option>
+                    <option value="0.161000">Overseas Shares - 16.10%</option>
+                    <option value="0.104100">Australian Shares - 10.41%</option>
+                    <option value="0.057200">Property - 5.72%</option>
+                    <option value="0.055400">Diversified Fixed Interest - 5.54%</option>
                 </optgroup>
-
-                <!-- BUSSQ Super (Date: 31 Jul 2026) -->
-                <optgroup label="BUSSQ Super - 31 Jul 26 (10 Year Record)">
-                    <option value="0.066100">Balanced Growth - 6.61% (10 yr)</option>
-                    <option value="0.020500">Cash - 2.05% (10 yr)</option>
-                    <option value="0.073800">Australian Shares - 7.38% (10 yr)</option>
-                    <option value="0.085100">International Shares - 8.51% (10 yr)</option>
-                    <option value="0.077200">Australian Small Company Shares - 7.72% (10 yr)</option>
-                    <option value="0.074700">International (Emg Mkts) Shares - 7.47% (10 yr)</option>
+                <optgroup label="Cbus TTR - 7 Year Record">
+                    <option value="0.055300">Conservative Growth (Default) - 5.53%</option>
+                    <option value="0.090400">High Growth - 9.04%</option>
+                    <option value="0.074200">Growth - 7.42%</option>
+                    <option value="0.037900">Conservative - 3.79%</option>
+                    <option value="0.022500">Cash - 2.25%</option>
                 </optgroup>
-
-                <!-- Hostplus (Date: 31 Jul 2026) -->
-                <optgroup label="Hostplus - 31 Jul 26 (10 Year Record)">
-                    <option value="0.089800">Growth - 8.98% (10 yr)</option>
-                    <option value="0.074200">Balanced - 7.42% (10 yr)</option>
-                    <option value="0.060800">Conservative - 6.08% (10 yr)</option>
-                    <option value="0.042300">Stable - 4.23% (10 yr)</option>
-                    <option value="0.077900">Indexed Balanced - 7.79% (10 yr)</option>
-                    <option value="0.067600">SRI - Balanced - 6.76% (10 yr)</option>
-                    <option value="0.023900">Cash - 2.39% (10 yr)</option>
-                    <option value="0.003500">Bonds - 0.35% (10 yr)</option>
-                    <option value="0.072600">Australian Shares - 7.26% (10 yr)</option>
-                    <option value="0.085400">International Shares - 8.54% (10 yr)</option>
-                    <option value="0.113000">International Shares - Indexed - 11.30% (10 yr)</option>
-                </optgroup>
-                <optgroup label="Hostplus - 31 Jul 26 (7 Year Record)">
-                    <option value="0.097000">High Growth - 9.70% (7 yr)</option>
-                    <option value="0.085900">Balanced (Default) - 8.59% (7 yr)</option>
-                    <option value="0.066400">Conservative - 6.64% (7 yr)</option>
-                    <option value="0.047600">Stable - 4.76% (7 yr)</option>
-                    <option value="0.084200">Indexed Balanced - 8.42% (7 yr)</option>
-                    <option value="0.021500">Cash - 2.15% (7 yr)</option>
-                    <option value="0.018900">Bonds - 1.89% (7 yr)</option>
-                    <option value="0.088700">Australian Shares - 8.87% (7 yr)</option>
-                    <option value="0.115500">International Shares - 11.55% (7 yr)</option>
-                </optgroup>
-                <optgroup label="Hostplus - 31 Jul 26 (3 Year Record)">
-                    <option value="0.100600">High Growth - 10.06% (3 yr)</option>
-                    <option value="0.041300">Defensive - 4.13% (3 yr)</option>
-                    <option value="0.106600">Indexed High Growth - 10.66% (3 yr)</option>
-                    <option value="0.106000">Indexed Growth - 10.60% (3 yr)</option>
-                    <option value="0.070800">Indexed Conservative - 7.08% (3 yr)</option>
-                    <option value="0.054100">Indexed Stable - 5.41% (3 yr)</option>
-                    <option value="0.039100">Indexed Defensive - 3.91% (3 yr)</option>
-                    <option value="0.087000">SRI - High Growth - 8.70% (3 yr)</option>
-                    <option value="0.035700">SRI - Defensive - 3.57% (3 yr)</option>
-                    <option value="0.014500">Bonds - Indexed - 1.45% (3 yr)</option>
-                    <option value="0.064500">Australian Shares - Indexed - 6.45% (3 yr)</option>
-                </optgroup>
-
-                <!-- Plum / MLC (Date: 31 Jul 2026) -->
-                <optgroup label="Plum / MLC - 31 Jul 26 (10 Year Record)">
-                    <option value="0.076000">MySuper Growth Portfolio - 7.60% (10 yr)</option>
-                    <option value="0.117000">MLC Aggressive - 11.70% (10 yr)</option>
-                    <option value="0.096000">MLC High Growth - 9.60% (10 yr)</option>
-                    <option value="0.083000">MLC Growth - 8.30% (10 yr)</option>
-                    <option value="0.074000">MLC Balanced - 7.40% (10 yr)</option>
-                    <option value="0.060000">MLC Conservative Balanced - 6.00% (10 yr)</option>
-                    <option value="0.043000">MLC Stable - 4.30% (10 yr)</option>
-                </optgroup>
-                <optgroup label="Plum / MLC - 31 Jul 26 (5 Year Record)">
-                    <option value="0.053000">MySuper Conservative Balanced - 5.30% (5 yr)</option>
-                    <option value="0.027000">MySuper Cash Portfolio - 2.70% (5 yr)</option>
-                </optgroup>
-
-                <!-- CBUS Super (Date: 31 Jul 2026) -->
-                <optgroup label="Cbus Super - 31 Jul 26 (10 Year Record)">
-                    <option value="0.079100">Growth (MySuper) - 7.91% (10 yr)</option>
-                    <option value="0.095100">High Growth - 9.51% (10 yr)</option>
-                    <option value="0.043000">Conservative - 4.30% (10 yr)</option>
-                    <option value="0.020600">Cash - 2.06% (10 yr)</option>
-                </optgroup>
-                <optgroup label="Cbus Super - 31 Jul 26 (5 Year Record)">
-                    <option value="0.047900">Conservative Growth - 4.79% (5 yr)</option>
-                    <option value="0.045600">Diversified Fixed Interest - 4.56% (5 yr)</option>
-                </optgroup>
-                <optgroup label="Cbus Super - 31 Jul 26 (3 Year Record)">
-                    <option value="0.096600">Growth Plus - 9.66% (3 yr)</option>
-                    <option value="0.102600">Indexed Diversified - 10.26% (3 yr)</option>
-                    <option value="0.139900">Overseas Shares - 13.99% (3 yr)</option>
-                    <option value="0.089700">Australian Shares - 8.97% (3 yr)</option>
-                    <option value="0.052000">Property - 5.20% (3 yr)</option>
-                </optgroup>
-
-                <!-- CBUS TTR (Date: 31 Jul 2026) -->
-                <optgroup label="Cbus TTR - 31 Jul 26 (7 Year Record)">
-                    <option value="0.072500">Conservative Growth (Default) - 7.25% (7 yr)</option>
-                    <option value="0.103700">High Growth - 10.37% (7 yr)</option>
-                    <option value="0.072900">Growth - 7.29% (7 yr)</option>
-                    <option value="0.033300">Conservative - 3.33% (7 yr)</option>
-                    <option value="0.022800">Cash - 2.28% (7 yr)</option>
-                </optgroup>
-                <optgroup label="Cbus TTR - 31 Jul 26 (3 Year Record)">
-                    <option value="0.096300">Growth Plus - 9.63% (3 yr)</option>
-                    <option value="0.102600">Indexed Diversified - 10.26% (3 yr)</option>
-                    <option value="0.140200">Overseas Shares - 14.02% (3 yr)</option>
-                    <option value="0.089800">Australian Shares - 8.98% (3 yr)</option>
-                    <option value="0.051300">Property - 5.13% (3 yr)</option>
-                    <option value="0.045600">Diversified Fixed Interest - 4.56% (3 yr)</option>
-                </optgroup>
-
-                <!-- CBUS Fully Retired (Date: 31 Jul 2026) -->
-                <optgroup label="Cbus Fully Retired - 31 Jul 26 (10 Year Record)">
-                    <option value="0.068400">Conservative Growth (Default) - 6.84% (10 yr)</option>
-                    <option value="0.105000">High Growth - 10.50% (10 yr)</option>
-                    <option value="0.087300">Growth - 8.73% (10 yr)</option>
-                    <option value="0.047500">Conservative - 4.75% (10 yr)</option>
-                    <option value="0.024400">Cash - 2.44% (10 yr)</option>
-                </optgroup>
-                <optgroup label="Cbus Fully Retired - 31 Jul 26 (7 Year Record)">
-                    <option value="0.053600">Diversified Fixed Interest - 5.36% (7 yr)</option>
-                </optgroup>
-                <optgroup label="Cbus Fully Retired - 31 Jul 26 (5 Year Record)">
-                    <option value="0.152400">Overseas Shares - 15.24% (5 yr)</option>
-                    <option value="0.099800">Australian Shares - 9.98% (5 yr)</option>
-                </optgroup>
-                <optgroup label="Cbus Fully Retired - 31 Jul 26 (3 Year Record)">
-                    <option value="0.103100">Growth Plus - 10.31% (3 yr)</option>
-                    <option value="0.116100">Indexed Diversified - 11.61% (3 yr)</option>
-                    <option value="0.056100">Property - 5.61% (3 yr)</option>
-                </optgroup>
-
-                <!-- General / Generic Options (Date: 31 Jul 2026) -->
-                <optgroup label="Generic Indices - 31 Jul 26 (10 Year Record)">
-                    <option value="0.098300">High Growth - 9.83% (10 yr)</option>
-                    <option value="0.084700">Balanced - 8.47% (10 yr)</option>
-                    <option value="0.065800">Conservative-Balanced - 6.58% (10 yr)</option>
-                    <option value="0.048100">Conservative - 4.81% (10 yr)</option>
-                    <option value="0.059500">Balanced Risk-Adjusted - 5.95% (10 yr)</option>
-                    <option value="0.075800">Socially Conscious Balanced - 7.58% (10 yr)</option>
-                    <option value="0.077100">Balanced Index - 7.71% (10 yr)</option>
-                    <option value="0.091700">Australian Shares Index - 9.17% (10 yr)</option>
-                    <option value="0.114800">International Shares Hedged Index - 11.48% (10 yr)</option>
-                    <option value="0.125200">International Shares Unhedged Index - 12.52% (10 yr)</option>
-                    <option value="0.061500">Listed Property Index - 6.15% (10 yr)</option>
-                    <option value="0.011400">Bonds Index - 1.14% (10 yr)</option>
-                    <option value="0.023400">Cash - 2.34% (10 yr)</option>
-                </optgroup>
-                <optgroup label="Generic Indices - 31 Jul 26 (7 Year Record)">
-                    <option value="0.074900">Unlisted Assets - 7.49% (7 yr)</option>
-                </optgroup>
-                <optgroup label="Generic Indices - 31 Jul 26 (1 Year Record)">
-                    <option value="0.102000">High Growth Index - 10.20% (1 yr)</option>
+                <optgroup label="Cbus TTR - 3 Year Record">
+                    <option value="0.100500">Growth Plus - 10.05%</option>
+                    <option value="0.107700">Indexed Diversified - 10.77%</option>
+                    <option value="0.148000">Overseas Shares - 14.80%</option>
+                    <option value="0.094000">Australian Shares - 9.40%</option>
+                    <option value="0.053100">Property - 5.31%</option>
+                    <option value="0.047100">Diversified Fixed Interest - 4.71%</option>
                 </optgroup>
             </select>
         </div>
@@ -419,15 +271,18 @@
         const freqText = document.getElementById('freq').options[document.getElementById('freq').selectedIndex].text;
         let annualSal = inputSal * freq;
 
+        // Apply frequency to fixed dollar SG if selected
         let annualSG = (sgMode === 'pct') ? (annualSal * (sgVal / 100)) : (sgVal * freq);
         document.getElementById('sgLabel').innerText = (sgMode === 'pct') ? "Employer SG Rate (%)" : `Employer SG Amount (${freqText} $)`;
 
+        // Apply frequency to fixed dollar Salary Sacrifice if selected
         let annualSS = (ssMode === 'pct') ? (annualSal * (ssVal / 100)) : (ssVal * freq);
         document.getElementById('ssLabel').innerText = (ssMode === 'pct') ? "Salary Sacrifice (%)" : `Salary Sacrifice (${freqText} $)`;
 
         let extraConc = 0;
         let extraNonConc = 0;
 
+        // Check if extra applies at current age for initial breakdown panel
         if (extraType !== 'none' && currentAge === extraStartAge) {
             if (extraType === 'oneoff_c' || extraType === 'ongoing_c') {
                 extraConc = extraAmt;
@@ -465,15 +320,18 @@
         let annualSal = startSal;
         let rows = "";
         
+        // Track the fixed dollar SG to apply wage growth if dollar mode is active
         let currentFixedSGAmt = (sgMode === 'dol') ? sgVal : 0;
         const inflationRate = 0.025;
 
         for (let i = 0; i < (retAge - age); i++) {
             let currentAge = age + i;
 
+            // Apply frequency and wage growth to fixed dollar SG
             let annualSG = (sgMode === 'pct') ? (annualSal * (sgVal / 100)) : (currentFixedSGAmt * freq);
             let annualSS = (ssMode === 'pct') ? (annualSal * (ssVal / 100)) : (ssVal * freq);
             
+            // Check if extra contribution applies in this year
             let extraConc = 0;
             let extraNonConc = 0;
 
@@ -504,6 +362,7 @@
             
             currentBal = currentBal + netConcessional + nonConcessional + earnings - fees;
 
+            // Calculate inflation discount factor if Real mode is selected
             let factor = (displayMode === 'real') ? Math.pow(1 + inflationRate, i) : 1;
 
             rows += `<tr>
@@ -515,6 +374,7 @@
                 <td class="bg-blue">${curr(currentBal / factor)}</td>
             </tr>`;
 
+            // Increment annual salary and fixed dollar SG by wage growth for the next year
             annualSal *= (1 + wageGrowth);
             if (sgMode === 'dol') {
                 currentFixedSGAmt *= (1 + wageGrowth);
