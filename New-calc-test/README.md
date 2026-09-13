@@ -1,28 +1,31 @@
-# Lifetime Journey Calculator — GitHub package
+# Working After 65 Calculator
 
-This package contains the current Lifetime Journey Calculator with the approved One-Touch Form Centre visual language applied. It uses the same bright blue, hi-vis green, white header treatment, heavy condensed typography, and sharply bordered fields without presenting the calculator as an approved product of any fund.
+This is a separate calculator for members aged 65 and over who continue working while maintaining both an accumulation account and one or more retirement-phase income streams.
 
-## Upload to GitHub
+## GitHub installation
 
-Upload both files to the calculator's existing GitHub folder:
+Upload both files to the new calculator folder in GitHub:
 
 - `index.html`
-- `shared-theme.css`
+- `theme.css`
 
-Keep the two files in the same folder. The stylesheet is linked with the relative path `shared-theme.css`.
+Keep them together in the same folder. The existing authentication guard redirects unauthenticated visitors to `../../index.html`, and the visible **Back to Dashboard** link uses the same route. Place the calculator two folder levels below the dashboard, consistent with the current calculator structure.
 
-The existing Supabase authentication guard and `../../index.html` dashboard route are preserved. The calculator should therefore remain two folder levels below the dashboard, matching the current setup.
+## Modelled features
 
-## What changed
+- Employment income and employer contributions after age 65
+- Salary sacrifice and personal deductible contributions within the concessional cap
+- Work-test handling for personal deductible contributions from ages 67–74
+- Separate accumulation and retirement income-stream balances and returns
+- Tax-free retirement-phase investment earnings and pension income assumptions
+- Personal transfer-balance cap usage and remaining space
+- Multiple scheduled income-stream commencements
+- Scheduled additions sourced from outside super or the accumulation account
+- Non-concessional annual cap and automatic two- or three-year bring-forward periods
+- Starting in year 2 or year 3 of an existing bring-forward arrangement
+- Warnings showing the financial year through which a bring-forward restriction continues
+- Voluntary contribution cutoff from age 75, while compulsory employer contributions continue
+- Statutory pension minimums, fixed/indexed income targets, and percentage withdrawals
+- Actual-dollar and today's-dollar chart/table views
 
-- Full-width bright blue header using the reference page's exact `#0639D8` blue and `#32ED67` green
-- Green calculator title, white subtitle, and green right-hand header statement
-- Condensed, heavy typography with Hubot Sans and condensed system fallbacks
-- Green input and select borders
-- Bright-blue numbered section boxes with green wording
-- Green primary action button
-- Consistent white panels, flatter spacing, and desktop-first responsive layout
-- Shared, neutrally named `shared-theme.css` for reuse across related tools
-- No fund logo and no fund name used as calculator branding
-
-No projection formulas, financial rules, chart calculations, input IDs, event handling, authentication logic, or dashboard routing were changed.
+The model uses fixed 2026–27 caps throughout the projection and explains material omissions or restrictions in the results.
