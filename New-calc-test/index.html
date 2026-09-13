@@ -21,6 +21,7 @@
   })();
   </script>
   <link rel="stylesheet" href="theme.css">
+  <script src="investment-returns.js"></script>
 </head>
 <body>
   <header class="app-header">
@@ -119,10 +120,10 @@
                 <option value="pct">% of earnings</option><option value="dol">$ per pay period</option>
               </select>
             </label>
-            <label>Salary sacrifice
+            <label>Salary-funded contribution target
               <input id="salarySacrifice" type="number" min="0" step="0.1" value="0" required>
             </label>
-            <label>Salary sacrifice unit
+            <label>Contribution target unit
               <select id="salarySacrificeMode">
                 <option value="pct">% of earnings</option><option value="dol">$ per pay period</option>
               </select>
@@ -134,8 +135,9 @@
               <input id="insurance" type="number" min="0" value="0" required>
             </label>
           </div>
+          <div id="takeHomeStatus" class="calculated-status"><strong>Calculate to see take-home pay</strong><span>The target is split between concessional and after-tax contributions.</span></div>
           <div class="rule-callout"><strong>AGE 75 RULE</strong><span>Voluntary contributions stop from age 75. Compulsory employer contributions continue while eligible employment continues. Existing accumulation money can still be transferred.</span></div>
-          <small>The work test affects personal contributions claimed as a deduction from ages 67–74. It does not prevent salary sacrifice or non-concessional contributions during that period.</small>
+          <small>The work test affects personal contributions claimed as a deduction from ages 67–74. The salary-funded target uses remaining concessional cap space first; the excess is tested as an after-tax contribution and reduces take-home pay.</small>
         </div>
       </section>
 
@@ -146,7 +148,7 @@
             <label>Income method
               <select id="incomeType">
                 <option value="dollar">Desired annual income</option>
-                <option value="minimum">Statutory pension minimum</option>
+                <option value="minimum" selected>Statutory pension minimum</option>
                 <option value="percent">Percentage of pension balance</option>
               </select>
             </label>
@@ -162,11 +164,11 @@
             <label class="percent-income">Percentage of opening pension (%)
               <input id="incomePercent" type="number" min="0" max="100" step="0.1" value="5" required>
             </label>
-            <label>Accumulation return (% p.a.)
-              <input id="accumulationReturn" type="number" step="0.01" value="7.91" required>
+            <label>Accumulation investment return
+              <select id="accumulationReturn" required></select>
             </label>
-            <label>Income-stream return (% p.a.)
-              <input id="pensionReturn" type="number" step="0.01" value="6.84" required>
+            <label>Fully retired investment return
+              <select id="pensionReturn" required></select>
             </label>
             <label>Fixed admin fee ($ per active account)
               <input id="fixedFee" type="number" min="0" value="52" required>
@@ -178,7 +180,8 @@
               <input id="percentageFeeCap" type="number" min="0" value="1000" required>
             </label>
           </div>
-          <small>Selected returns are held constant. Income-stream earnings are modelled without investment earnings tax. Pension payments after age 60 are treated as tax-free for a taxed-source account.</small>
+          <div id="investmentDataStatus" class="data-status"></div>
+          <small>Selected historical crediting rates are held constant as projection assumptions, not forecasts. Income-stream earnings are modelled without investment earnings tax. Pension payments after age 60 are treated as tax-free for a taxed-source account.</small>
         </div>
       </section>
 
@@ -210,6 +213,7 @@
         </div>
         <div class="legend"><span><i class="acc"></i>Accumulation</span><span><i class="pen"></i>Income stream</span><span><i class="out"></i>Pension income</span></div>
         <div id="chart" class="scroller"></div>
+        <p class="chart-note">Hover, tap or focus any year to see the complete contribution, tax, take-home, income and balance detail.</p>
         <div id="table" class="scroller" hidden></div>
       </div>
     </section>
@@ -225,7 +229,11 @@
           <li>Current income-stream balance does not determine transfer-balance cap already used. Pension investment growth and ordinary pension payments do not change historical cap usage.</li>
           <li>Voluntary contributions stop from age 75 in the annual model. Compulsory employer contributions continue. The precise 28-day birthday-month window is not modelled.</li>
           <li>Minimum pension payments use the opening income-stream balance after any scheduled start-of-year addition. Commencement-year pro-rating and fund processing delays are not modelled.</li>
-          <li>Division 293 is a salary-only estimate. Employer contributions above the concessional cap are retained after estimated marginal tax is released. Division 296 tax is excluded.</li>
+          <li>The salary-funded target first uses concessional cap space remaining after employer contributions. Any target above that space is treated as an after-tax contribution, subject to available take-home pay and the non-concessional/bring-forward cap. Personal deductible amounts that fail the work test are tested as non-concessional instead.</li>
+          <li>Employer contributions above the concessional cap remain excess concessional contributions. The estimate retains them in super after marginal tax is released, and counts them against non-concessional cap space. Additional excess non-concessional tax is outside the model.</li>
+          <li>Estimated take-home pay uses 2026–27 resident tax rates plus a full 2% Medicare levy. It excludes offsets, deductions, HELP repayments, Medicare reductions/exemptions and other income.</li>
+          <li>Division 293 is a salary-only estimate. Division 296 tax is excluded.</li>
+          <li>Investment choices load from <code>investment-returns.js</code>, so published figures can be refreshed without editing the calculator engine. Historical performance is not a forecast.</li>
         </ul>
         <p>General scenario tool only. It does not account for every personal transfer-balance event, tax component, carry-forward concessional amount, fund rule, or future legislative change.</p>
         <p>Rule references: <a href="https://www.ato.gov.au/individuals-and-families/super-for-individuals-and-families/super/withdrawing-and-using-your-super/early-access-to-super/illegal-early-access-to-super">access after 65</a> · <a href="https://www.ato.gov.au/individuals-and-families/super-for-individuals-and-families/super/growing-and-keeping-track-of-your-super/how-to-save-more-in-your-super/personal-super-contributions">contribution age and work-test rules</a> · <a href="https://www.ato.gov.au/api/public/content/0-6c3220ce-b973-4514-84e0-0f9f28c4d0a7">caps and bring-forward rules</a>.</p>
@@ -234,6 +242,7 @@
   </main>
 
   <footer>WORKING AFTER 65 · Planning estimates with assumptions you can inspect.</footer>
+  <div id="tooltip" role="tooltip" hidden></div>
   <script>
 const RULES = Object.freeze({
   startYear: 2026,
@@ -263,7 +272,7 @@ const defaults = {
   salarySacrificeMode: 'pct',
   personalDeductible: 0,
   workTestMet: 'yes',
-  incomeType: 'dollar',
+  incomeType: 'minimum',
   income: 40000,
   incomeTiming: 'fixed',
   incomePercent: 5,
@@ -371,30 +380,75 @@ function project(parameters = {}) {
     const openingPensionBeforeAdditions = pension;
     const openingTotal = accumulation + pension;
     const notes = [];
+    const salary = p.salary * p.salaryFrequency * Math.pow(1 + p.wageGrowth / 100, index);
     const yearEvents = p.events.filter(event => event.age === age);
     const requestedOutside = yearEvents.filter(event => event.source === 'outside').reduce((sum, event) => sum + event.amount, 0);
     const requestedAccumulationTransfer = yearEvents.filter(event => event.source === 'accumulation').reduce((sum, event) => sum + event.amount, 0);
 
-    let outsideAccepted = 0;
-    let outsideOmitted = 0;
-    let bringForwardEndYear = bringForward?.endYear ?? null;
+    let employer = p.employerContributionMode === 'pct'
+      ? salary * p.employerContribution / 100
+      : p.employerContribution * p.salaryFrequency * Math.pow(1 + p.wageGrowth / 100, index);
+    const salarySacrificeTarget = p.salarySacrificeMode === 'pct'
+      ? salary * p.salarySacrifice / 100
+      : p.salarySacrifice * p.salaryFrequency;
+    const salarySacrificeRequested = Math.min(salary, salarySacrificeTarget);
+    const personalDeductibleRequested = p.personalDeductible;
+    if (salarySacrificeTarget > salary) notes.push('Salary-funded contribution target was limited to gross salary.');
 
-    if (requestedOutside > 0) {
-      if (age >= RULES.voluntaryContributionStopAge) {
-        outsideOmitted = requestedOutside;
-        notes.push(`${money(requestedOutside)} outside-super contribution omitted from age 75.`);
-      } else {
-        let allowance = 0;
+    const employerWithinCap = Math.min(employer, RULES.concessionalCap);
+    const excessEmployer = Math.max(0, employer - RULES.concessionalCap);
+    let voluntaryCapSpace = Math.max(0, RULES.concessionalCap - employerWithinCap);
+    let salarySacrificeConcessional = 0;
+    let personalDeductibleConcessional = 0;
+    let salaryFundedNccRequested = 0;
+    let ageOrWorkTestRedirect = 0;
+
+    if (age >= RULES.voluntaryContributionStopAge) {
+      notes.push('Voluntary contributions stopped from age 75; compulsory employer contributions continue while employed.');
+    } else {
+      salarySacrificeConcessional = Math.min(salarySacrificeRequested, voluntaryCapSpace);
+      voluntaryCapSpace -= salarySacrificeConcessional;
+      const deductibleEligible = age < 67 || p.workTestMet === 'yes';
+      if (deductibleEligible) {
+        personalDeductibleConcessional = Math.min(personalDeductibleRequested, voluntaryCapSpace);
+      } else if (personalDeductibleRequested > 0) {
+        ageOrWorkTestRedirect = personalDeductibleRequested;
+        notes.push('The personal contribution cannot be claimed as a deduction because the work test was not met; it is tested as a non-concessional contribution instead.');
+      }
+      salaryFundedNccRequested = Math.max(0, salarySacrificeRequested - salarySacrificeConcessional)
+        + Math.max(0, personalDeductibleRequested - personalDeductibleConcessional);
+    }
+
+    const voluntaryConcessional = salarySacrificeConcessional + personalDeductibleConcessional;
+    const concessional = employer + voluntaryConcessional;
+    const contributionsTax = concessional * 0.15;
+    const taxableSalary = Math.max(0, salary - salarySacrificeConcessional - personalDeductibleConcessional);
+    const estimatedPersonalTax = residentTax2026(taxableSalary);
+    const takeHomeBeforeNcc = Math.max(0, salary - salarySacrificeConcessional - personalDeductibleConcessional - estimatedPersonalTax);
+
+    let outsideAccepted = 0;
+    let outsideOmitted = age >= RULES.voluntaryContributionStopAge ? requestedOutside : 0;
+    const eligibleOutsideRequest = age >= RULES.voluntaryContributionStopAge ? 0 : requestedOutside;
+    let salaryFundedNccAccepted = 0;
+    let salaryFundedNccOmitted = salaryFundedNccRequested;
+    let bringForwardEndYear = bringForward?.endYear ?? null;
+    let nccAllowance = 0;
+    const totalNccDemand = eligibleOutsideRequest + salaryFundedNccRequested + excessEmployer;
+
+    if (outsideOmitted > 0) notes.push(`${money(outsideOmitted)} outside-super contribution omitted from age 75.`);
+
+    if (totalNccDemand > 0) {
+      {
         if (bringForward) {
           if (openingTotal >= RULES.generalTransferBalanceCap) {
-            allowance = 0;
+            nccAllowance = 0;
             notes.push('No non-concessional cap is available because the opening total super balance is at least $2.1 million.');
           } else {
-            allowance = bringForward.remaining;
+            nccAllowance = bringForward.remaining;
           }
         } else {
           const firstYearCap = firstYearBringForwardCap(openingTotal);
-          if (requestedOutside > RULES.nonConcessionalCap && firstYearCap > RULES.nonConcessionalCap) {
+          if (totalNccDemand > RULES.nonConcessionalCap && firstYearCap > RULES.nonConcessionalCap) {
             const years = firstYearCap === RULES.nonConcessionalCap * 3 ? 3 : 2;
             bringForward = {
               startedYear: year,
@@ -403,19 +457,29 @@ function project(parameters = {}) {
               remaining: firstYearCap
             };
             bringForwardEndYear = bringForward.endYear;
-            allowance = bringForward.remaining;
+            nccAllowance = bringForward.remaining;
             notes.push(`Bring-forward arrangement triggered; restrictions continue through ${financialYear(bringForward.endYear)}.`);
           } else {
-            allowance = firstYearCap > 0 ? RULES.nonConcessionalCap : 0;
+            nccAllowance = firstYearCap > 0 ? RULES.nonConcessionalCap : 0;
           }
         }
-        outsideAccepted = Math.min(requestedOutside, allowance);
-        outsideOmitted = requestedOutside - outsideAccepted;
-        if (bringForward) bringForward.remaining = Math.max(0, bringForward.remaining - outsideAccepted);
+        const electiveAllowance = Math.max(0, nccAllowance - excessEmployer);
+        outsideAccepted = Math.min(eligibleOutsideRequest, electiveAllowance);
+        outsideOmitted += eligibleOutsideRequest - outsideAccepted;
+        const remainingAfterOutside = Math.max(0, electiveAllowance - outsideAccepted);
+        salaryFundedNccAccepted = Math.min(salaryFundedNccRequested, remainingAfterOutside, takeHomeBeforeNcc);
+        salaryFundedNccOmitted = salaryFundedNccRequested - salaryFundedNccAccepted;
+        const nccCapConsumed = Math.min(nccAllowance, excessEmployer + outsideAccepted + salaryFundedNccAccepted);
+        if (bringForward) bringForward.remaining = Math.max(0, bringForward.remaining - nccCapConsumed);
         if (outsideOmitted > 0) notes.push(`${money(outsideOmitted)} of the requested outside-super contribution was not accepted under the available non-concessional cap.`);
+        if (salaryFundedNccAccepted > 0) notes.push(`${money(salaryFundedNccAccepted)} above the available concessional cap was redirected as an after-tax non-concessional contribution.`);
+        if (salaryFundedNccOmitted > 0) notes.push(`${money(salaryFundedNccOmitted)} of the redirected after-tax contribution was not made because of take-home pay or non-concessional cap limits.`);
+        if (excessEmployer > nccAllowance) notes.push('Employer excess concessional contributions exceed the available non-concessional cap; any additional tax is not modelled.');
         if (bringForward) notes.push(`${money(bringForward.remaining)} remains available in the bring-forward arrangement through ${financialYear(bringForward.endYear)}.`);
       }
     }
+
+    const takeHomePay = Math.max(0, takeHomeBeforeNcc - salaryFundedNccAccepted);
 
     accumulation += outsideAccepted;
     const transferSpaceAtStart = Math.max(0, p.personalTransferBalanceCap - transferBalanceUsed);
@@ -429,41 +493,11 @@ function project(parameters = {}) {
     if (transferredToPension > 0) notes.push(`${money(transferredToPension)} commenced as a new retirement-phase income stream at the start of the year.`);
     if (transferOmitted > 0) notes.push(`${money(transferOmitted)} could not be transferred to retirement phase because of available accumulation funds or personal transfer-balance cap space; any accepted outside contribution remains in accumulation.`);
 
-    const salary = p.salary * p.salaryFrequency * Math.pow(1 + p.wageGrowth / 100, index);
-    let employer = p.employerContributionMode === 'pct'
-      ? salary * p.employerContribution / 100
-      : p.employerContribution * p.salaryFrequency * Math.pow(1 + p.wageGrowth / 100, index);
-    let salarySacrifice = p.salarySacrificeMode === 'pct'
-      ? salary * p.salarySacrifice / 100
-      : p.salarySacrifice * p.salaryFrequency;
-    let personalDeductible = p.personalDeductible;
-    let omittedVoluntary = 0;
-    if (age >= RULES.voluntaryContributionStopAge) {
-      omittedVoluntary += salarySacrifice + personalDeductible;
-      salarySacrifice = 0;
-      personalDeductible = 0;
-      notes.push('Voluntary contributions stopped from age 75; compulsory employer contributions continue while employed.');
-    } else if (age >= 67 && p.workTestMet !== 'yes' && personalDeductible > 0) {
-      omittedVoluntary += personalDeductible;
-      personalDeductible = 0;
-      notes.push('Personal deductible contribution omitted because the work test was not met.');
-    }
-
-    const employerWithinCap = Math.min(employer, RULES.concessionalCap);
-    const excessEmployer = Math.max(0, employer - RULES.concessionalCap);
-    const voluntaryRequested = salarySacrifice + personalDeductible;
-    const voluntaryAccepted = Math.min(voluntaryRequested, Math.max(0, RULES.concessionalCap - employerWithinCap));
-    omittedVoluntary += voluntaryRequested - voluntaryAccepted;
-    if (omittedVoluntary > 0) notes.push(`${money(omittedVoluntary)} of requested voluntary concessional contributions was omitted under cap, work-test or age rules.`);
-
-    const concessional = employer + voluntaryAccepted;
-    const contributionsTax = concessional * 0.15;
-    const taxableSalary = Math.max(0, salary - voluntaryAccepted);
     const excessPersonalTax = residentTax2026(taxableSalary + excessEmployer) - residentTax2026(taxableSalary);
     const excessTaxRelease = Math.max(0, excessPersonalTax - excessEmployer * 0.15);
-    const cappedConcessional = employerWithinCap + voluntaryAccepted;
+    const cappedConcessional = employerWithinCap + voluntaryConcessional;
     const division293 = 0.15 * Math.min(cappedConcessional, Math.max(0, taxableSalary + excessEmployer + cappedConcessional - RULES.division293Threshold));
-    const netAccumulationContribution = concessional - contributionsTax - excessTaxRelease - division293;
+    const netAccumulationContribution = concessional - contributionsTax - excessTaxRelease - division293 + salaryFundedNccAccepted;
     if (excessEmployer > 0) notes.push(`${money(excessEmployer)} employer contribution exceeded the concessional cap; estimated marginal tax was released from super.`);
     if (division293 > 0) notes.push('Division 293 estimate assumes salary-only income and payment from super.');
 
@@ -521,7 +555,11 @@ function project(parameters = {}) {
       transferBalanceRemaining: Math.max(0, p.personalTransferBalanceCap - transferBalanceUsed),
       bringForwardRemaining: bringForward?.remaining ?? 0,
       bringForwardEndYear,
-      employerContribution: employer, voluntaryConcessional: voluntaryAccepted,
+      employerContribution: employer, salarySacrificeRequested, personalDeductibleRequested,
+      salarySacrificeConcessional, personalDeductibleConcessional, voluntaryConcessional,
+      salaryFundedNccRequested, salaryFundedNccAccepted, salaryFundedNccOmitted,
+      ageOrWorkTestRedirect, estimatedPersonalTax, taxableSalary, takeHomePay,
+      spendableIncome: takeHomePay + withdrawal,
       contributionsTax, excessEmployer, excessTaxRelease, division293,
       netAccumulationContribution,
       pensionOpeningForMinimum, minimum, desired, withdrawal, shortfall,
@@ -555,8 +593,37 @@ let displayReal = false;
 let displayView = 'chart';
 let transferUsageTouched = false;
 
+const RETURN_PERIODS = [
+  ['tenYears', '10 years p.a.'],
+  ['sevenYears', '7 years p.a.'],
+  ['fiveYears', '5 years p.a.'],
+  ['threeYears', '3 years p.a.'],
+  ['oneYear', '1 year'],
+  ['sinceInception', 'Since inception p.a.']
+];
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"]/g, character => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[character]));
+}
+
+function populateReturnSelect(id, collection, defaultName, defaultPeriod) {
+  const select = byId(id);
+  select.innerHTML = RETURN_PERIODS.map(([period, label]) => {
+    const available = collection.filter(item => Number.isFinite(item.returns[period]));
+    if (!available.length) return '';
+    return `<optgroup label="Published to ${escapeHtml(INVESTMENT_RETURNS.asAt)} · ${label}">${available.map(item => {
+      const selected = item.name === defaultName && period === defaultPeriod ? ' selected' : '';
+      const rate = item.returns[period];
+      return `<option value="${rate}" data-option="${escapeHtml(item.name)}" data-period="${label}"${selected}>${escapeHtml(item.name)} — ${rate.toFixed(2)}% · ${label}</option>`;
+    }).join('')}</optgroup>`;
+  }).join('');
+}
+
+function initialiseInvestmentReturns() {
+  if (!globalThis.INVESTMENT_RETURNS) throw Error('The investment return data file could not be loaded.');
+  populateReturnSelect('accumulationReturn', INVESTMENT_RETURNS.accumulation, 'Growth (MySuper)', 'tenYears');
+  populateReturnSelect('pensionReturn', INVESTMENT_RETURNS.pension, 'Conservative Growth (default)', 'tenYears');
+  byId('investmentDataStatus').innerHTML = `<strong>Published returns to ${escapeHtml(INVESTMENT_RETURNS.asAt)}</strong> · checked ${escapeHtml(INVESTMENT_RETURNS.checked)} · <a href="${INVESTMENT_RETURNS.sourceUrls.accumulation}" target="_blank" rel="noopener">accumulation source</a> · <a href="${INVESTMENT_RETURNS.sourceUrls.pension}" target="_blank" rel="noopener">fully retired source</a>. Update the separate <code>investment-returns.js</code> file when new figures are released.`;
 }
 
 function ageOptions(selected) {
@@ -658,7 +725,7 @@ function importantNotes() {
   const notes = [];
   for (const row of result.rows) {
     for (const note of row.notes) {
-      if (/bring-forward|not accepted|could not be transferred|omitted|stopped|work test|exceeded|Division 293/i.test(note)) {
+      if (/bring-forward|not accepted|could not be transferred|omitted|stopped|work test|exceeded|redirected|Division 293/i.test(note)) {
         notes.push(`<strong>${row.financialYear} · age ${row.age}:</strong> ${escapeHtml(note)}`);
       }
     }
@@ -667,12 +734,57 @@ function importantNotes() {
 }
 
 function renderStats() {
+  const first = result.rows[0];
   const last = result.rows.at(-1);
+  const totalGrowth = last.closingTotal - first.openingTotal;
   byId('stats').innerHTML = `
+    <div><span>First-year take-home pay</span><strong>${formatMoney(displayValue(first, 'takeHomePay', 'flow'))}</strong></div>
+    <div><span>Take-home + pension income</span><strong>${formatMoney(displayValue(first, 'spendableIncome', 'flow'))}</strong></div>
+    <div><span>First-year after-tax contribution</span><strong>${formatMoney(displayValue(first, 'salaryFundedNccAccepted', 'flow'))}</strong></div>
     <div><span>Total super · age ${last.age + 1}</span><strong>${formatMoney(displayValue(last, 'closingTotal'))}</strong></div>
-    <div><span>Income-stream balance</span><strong>${formatMoney(displayValue(last, 'closingPension'))}</strong></div>
-    <div><span>Accumulation balance</span><strong>${formatMoney(displayValue(last, 'closingAccumulation'))}</strong></div>
+    <div><span>Total super growth</span><strong>${formatMoney(displayReal ? displayValue(last, 'closingTotal') - first.openingTotal : totalGrowth)}</strong></div>
     <div><span>Transfer cap remaining</span><strong>${formatMoney(last.transferBalanceRemaining)}</strong></div>`;
+  byId('takeHomeStatus').innerHTML = `<strong>${formatMoney(first.takeHomePay)} estimated first-year take-home pay</strong><span>${formatMoney(first.voluntaryConcessional)} concessional + ${formatMoney(first.salaryFundedNccAccepted)} after-tax from the salary-funded/personal contribution targets; pension income is shown separately.</span>`;
+}
+
+function showTooltip(row, event) {
+  const fields = [
+    ['Gross salary', 'salary', 'flow'],
+    ['Estimated personal tax + Medicare', 'estimatedPersonalTax', 'flow'],
+    ['Take-home pay after contributions', 'takeHomePay', 'flow'],
+    ['Pension income received', 'withdrawal', 'flow'],
+    ['Total spendable income', 'spendableIncome', 'flow'],
+    ['Opening accumulation', 'openingAccumulation', 'opening'],
+    ['Opening income stream', 'openingPension', 'opening'],
+    ['Employer contribution', 'employerContribution', 'flow'],
+    ['Voluntary concessional contribution', 'voluntaryConcessional', 'flow'],
+    ['Redirected after-tax contribution', 'salaryFundedNccAccepted', 'flow'],
+    ['Outside lump sum accepted', 'outsideAccepted', 'flow'],
+    ['New income stream commenced', 'transferredToPension', 'flow'],
+    ['Contributions tax', 'contributionsTax', 'flow'],
+    ['Excess contribution tax release', 'excessTaxRelease', 'flow'],
+    ['Division 293 estimate', 'division293', 'flow'],
+    ['Accumulation investment earnings', 'earningsAccumulation', 'flow'],
+    ['Income-stream investment earnings', 'earningsPension', 'flow'],
+    ['Accumulation fees / insurance', 'feesAccumulation', 'flow'],
+    ['Income-stream fees', 'feesPension', 'flow'],
+    ['Statutory minimum pension', 'minimum', 'flow'],
+    ['Closing accumulation', 'closingAccumulation', 'closing'],
+    ['Closing income stream', 'closingPension', 'closing'],
+    ['Closing total super', 'closingTotal', 'closing'],
+    ['Transfer cap remaining', 'transferBalanceRemaining', 'closing'],
+    ['Bring-forward amount remaining', 'bringForwardRemaining', 'closing']
+  ];
+  byId('tooltip').innerHTML = `<b>${row.financialYear} · AGE ${row.age} → ${row.age + 1}</b><div class="tip-sub">${displayReal ? "Today's dollars" : 'Actual dollars'} · complete annual detail</div><dl>${fields.map(([label, key, timing]) => `<dt>${label}</dt><dd>${formatMoney(displayValue(row, key, timing))}</dd>`).join('')}</dl><div class="tip-notes">${row.notes.length ? row.notes.map(escapeHtml).join(' ') : 'No special cap or funding notes for this year.'}</div>`;
+  byId('tooltip').hidden = false;
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = event.clientX || rect.x + rect.width / 2;
+  const y = event.clientY || rect.y + rect.height / 2;
+  const width = byId('tooltip').offsetWidth || 360;
+  const height = byId('tooltip').offsetHeight || 500;
+  const left = x + width + 24 > innerWidth ? x - width - 12 : x + 12;
+  byId('tooltip').style.left = `${Math.max(12, Math.min(innerWidth - width - 12, left))}px`;
+  byId('tooltip').style.top = `${Math.max(8, Math.min(innerHeight - height - 8, y + 12))}px`;
 }
 
 function renderChart() {
@@ -697,7 +809,7 @@ function renderChart() {
     const pensionHeight = displayValue(row, 'closingPension') * scale;
     const incomeHeight = displayValue(row, 'withdrawal', 'flow') * scale;
     const title = `${row.financialYear}, age ${row.age}: accumulation ${formatMoney(displayValue(row, 'closingAccumulation'))}, income stream ${formatMoney(displayValue(row, 'closingPension'))}, pension income ${formatMoney(displayValue(row, 'withdrawal', 'flow'))}`;
-    svg += `<g tabindex="0"><title>${escapeHtml(title)}</title>
+    svg += `<g tabindex="0" data-i="${index}"><title>${escapeHtml(title)}</title>
       <rect x="${x}" y="${zero - accumulationHeight}" width="${barWidth}" height="${accumulationHeight}" fill="#0639d8"/>
       <rect x="${x}" y="${zero - accumulationHeight - pensionHeight}" width="${barWidth}" height="${pensionHeight}" fill="#32ed67"/>
       <rect x="${x}" y="${zero}" width="${barWidth}" height="${incomeHeight}" fill="#0639d8" opacity=".72"/>
@@ -707,20 +819,30 @@ function renderChart() {
   });
   svg += `<text x="${left}" y="${height - 12}" fill="#536476" font-size="11">Age at start of financial year · dots mark scheduled income-stream commencements</text></svg>`;
   byId('chart').innerHTML = svg;
+  byId('chart').querySelectorAll('g[data-i]').forEach(group => {
+    for (const eventName of ['pointerenter', 'pointermove', 'focus', 'click']) {
+      group.addEventListener(eventName, event => showTooltip(rows[Number(group.dataset.i)], event));
+    }
+    group.addEventListener('pointerleave', () => { byId('tooltip').hidden = true; });
+    group.addEventListener('blur', () => { byId('tooltip').hidden = true; });
+  });
 }
 
 function renderTable() {
   const rows = result.rows;
   byId('table').innerHTML = `<table>
-    <thead><tr><th>Year / age</th><th>Salary</th><th>Opening accumulation</th><th>Opening income stream</th><th>Outside contribution accepted</th><th>New income stream</th><th>Employer + voluntary contributions</th><th>Accumulation earnings</th><th>Income-stream earnings</th><th>Pension income</th><th>Closing accumulation</th><th>Closing income stream</th><th>Cap remaining</th><th>Notes</th></tr></thead>
+    <thead><tr><th>Year / age</th><th>Salary</th><th>Take-home pay</th><th>Spendable income</th><th>Opening accumulation</th><th>Opening income stream</th><th>Concessional contribution</th><th>Redirected after-tax contribution</th><th>Outside contribution accepted</th><th>New income stream</th><th>Accumulation earnings</th><th>Income-stream earnings</th><th>Pension income</th><th>Closing accumulation</th><th>Closing income stream</th><th>Cap remaining</th><th>Notes</th></tr></thead>
     <tbody>${rows.map(row => `<tr>
       <td>${row.financialYear}<br>age ${row.age}→${row.age + 1}</td>
       <td>${formatMoney(displayValue(row, 'salary', 'flow'))}</td>
+      <td>${formatMoney(displayValue(row, 'takeHomePay', 'flow'))}</td>
+      <td>${formatMoney(displayValue(row, 'spendableIncome', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'openingAccumulation', 'opening'))}</td>
       <td>${formatMoney(displayValue(row, 'openingPension', 'opening'))}</td>
+      <td>${formatMoney(displayValue(row, 'voluntaryConcessional', 'flow'))}</td>
+      <td>${formatMoney(displayValue(row, 'salaryFundedNccAccepted', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'outsideAccepted', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'transferredToPension', 'flow'))}</td>
-      <td>${formatMoney(displayValue(row, 'netAccumulationContribution', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'earningsAccumulation', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'earningsPension', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'withdrawal', 'flow'))}</td>
@@ -736,6 +858,7 @@ function render() {
   if (!result) return;
   const basis = displayReal ? `Today's dollars · ${result.parameters.wageInflation}% discount rate` : 'Actual dollars';
   const notices = [...result.warnings.map(escapeHtml), ...importantNotes()];
+  byId('tooltip').hidden = true;
   byId('alerts').innerHTML = notices.map(note => `<div class="alert">${note}</div>`).join('');
   renderStats();
   renderChart();
@@ -799,6 +922,10 @@ byId('tableButton').addEventListener('click', () => { displayView = 'table'; ren
 byId('actualButton').addEventListener('click', () => { displayReal = false; render(); });
 byId('realButton').addEventListener('click', () => { displayReal = true; render(); });
 
+document.addEventListener('keydown', event => { if (event.key === 'Escape') byId('tooltip').hidden = true; });
+document.addEventListener('pointerdown', event => { if (!event.target.closest('#chart')) byId('tooltip').hidden = true; });
+
+initialiseInvestmentReturns();
 renderAdditionRows([{age: 65, source: 'outside', amount: 0}]);
 updateConditionalFields();
 calculate();

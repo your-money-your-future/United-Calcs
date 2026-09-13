@@ -43,6 +43,7 @@ small { display: block; margin-top: 9px; color: var(--muted); font-size: 12px; }
 .calculated-status { display: flex; gap: 14px; align-items: center; margin-top: 14px; padding: 11px 13px; border-left: 7px solid var(--green); background: var(--pale); }
 .calculated-status strong { font-size: 18px; }
 .calculated-status span { color: var(--muted); font-size: 13px; }
+.data-status { margin-top: 12px; padding: 10px 12px; border: 2px solid var(--blue); background: #effff4; color: var(--blue); font-size: 12px; }
 .subsection { margin-top: 16px; padding-top: 14px; border-top: 2px solid var(--blue); }
 .subsection h3 { margin: 0 0 10px; color: var(--blue); font-size: 18px; }
 [hidden] { display: none !important; }
@@ -70,7 +71,7 @@ button { cursor: pointer; }
 #error { margin: 0; color: #b42318; }
 
 .alert { margin-bottom: 8px; padding: 11px 13px; border: 2px solid var(--blue); border-left: 8px solid var(--green); background: #effff4; color: var(--blue); font-size: 13px; }
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0; }
 .stats > div { min-height: 88px; padding: 13px; border: 2px solid var(--blue); border-top: 8px solid var(--green); background: #fff; }
 .stats span { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; }
 .stats strong { display: block; margin-top: 6px; color: var(--blue); font-size: clamp(20px, 2.2vw, 29px); font-weight: 900; letter-spacing: -.035em; }
@@ -88,6 +89,15 @@ button { cursor: pointer; }
 #chart { border: 1px solid var(--line); background: linear-gradient(180deg,#fff 0,#fff 78%,#f7f9fb 78%); }
 #chart svg { display: block; width: 100%; min-width: 920px; height: 540px; }
 #chart g:focus rect { stroke: #111; stroke-width: 2; }
+#chart g[data-i] { cursor: help; }
+.chart-note { margin: 8px 0 14px; color: var(--muted); font-size: 12px; }
+#tooltip { position: fixed; z-index: 50; width: 360px; max-width: calc(100vw - 24px); max-height: calc(100vh - 20px); overflow: auto; padding: 16px; border: 3px solid var(--green); border-radius: 4px; background: var(--blue); color: #fff; box-shadow: 0 14px 34px rgba(0,0,0,.28); pointer-events: none; font-size: 12px; }
+#tooltip b { display: block; color: var(--green); font-size: 17px; }
+#tooltip .tip-sub { margin: 2px 0 10px; color: #fff; }
+#tooltip dl { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 12px; margin: 0; }
+#tooltip dt { color: #fff; }
+#tooltip dd { margin: 0; color: var(--green); text-align: right; font-variant-numeric: tabular-nums; }
+#tooltip .tip-notes { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.35); color: #fff; font-size: 11px; }
 
 table { width: 100%; border-collapse: collapse; color: var(--blue); font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 th, td { padding: 9px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
