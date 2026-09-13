@@ -17,12 +17,13 @@ Keep them together in the same folder. The existing authentication guard redirec
 - Employment income and employer contributions after age 65
 - Salary-funded and personal deductible contribution targets, split automatically between remaining concessional cap space and after-tax contributions
 - Estimated take-home pay after tax, Medicare levy and salary-funded contributions—including high contribution targets such as 70%
+- Total desired annual income mode that counts take-home pay first, then requests only the required income-stream amount (subject to the statutory minimum)
 - Shared non-concessional/bring-forward allowance across redirected salary contributions, outside lump sums and retained excess employer contributions
 - Work-test handling for personal deductible contributions from ages 67–74
 - Separate accumulation and retirement income-stream balances and returns
 - Tax-free retirement-phase investment earnings and pension income assumptions
 - Personal transfer-balance cap usage and remaining space
-- Multiple scheduled income-stream commencements
+- Multiple scheduled additional transfers to the income stream
 - Scheduled additions sourced from outside super or the accumulation account
 - Non-concessional annual cap and automatic two- or three-year bring-forward periods
 - Starting in year 2 or year 3 of an existing bring-forward arrangement

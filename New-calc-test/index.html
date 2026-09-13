@@ -147,12 +147,12 @@
           <div class="field-grid four">
             <label>Income method
               <select id="incomeType">
-                <option value="dollar">Desired annual income</option>
+                <option value="dollar">Total desired annual income</option>
                 <option value="minimum" selected>Statutory pension minimum</option>
                 <option value="percent">Percentage of pension balance</option>
               </select>
             </label>
-            <label class="dollar-income">Desired pension income ($)
+            <label class="dollar-income">Total desired annual income ($)
               <input id="income" type="number" min="0" value="40000" required>
             </label>
             <label class="dollar-income">Income treatment
@@ -188,7 +188,7 @@
       <section class="form-section additions-section">
         <div class="section-title"><span>04</span><h2>Scheduled income-stream additions</h2></div>
         <div class="section-body">
-          <p class="section-note">Outside money enters accumulation as a non-concessional contribution before commencing a new income stream. Existing accumulation transfers do not use the non-concessional cap. Both use personal transfer-balance cap space.</p>
+          <p class="section-note">Outside money enters accumulation as a non-concessional contribution before an additional transfer to the income stream. Existing accumulation transfers do not use the non-concessional cap. Both use personal transfer-balance cap space.</p>
           <div class="addition-head"><span>Financial year / age</span><span>Source</span><span>Amount</span><span></span></div>
           <div id="additionRows"></div>
           <button id="addAddition" class="secondary-button" type="button" disabled>＋ Add another year</button>
@@ -211,9 +211,9 @@
           <div class="segmented"><button id="chartButton" type="button" aria-pressed="true">BAR CHART</button><button id="tableButton" type="button" aria-pressed="false">DOLLAR TABLE</button></div>
           <div class="segmented"><button id="actualButton" type="button" aria-pressed="true">ACTUAL DOLLARS</button><button id="realButton" type="button" aria-pressed="false">TODAY'S DOLLARS</button></div>
         </div>
-        <div class="legend"><span><i class="acc"></i>Accumulation</span><span><i class="pen"></i>Income stream</span><span><i class="out"></i>Pension income</span></div>
+        <div class="legend"><span><i class="acc"></i>Accumulation balance · dark blue</span><span><i class="pen"></i>Income-stream balance · green</span><span><i class="out"></i>Income-stream payment · bright blue</span></div>
         <div id="chart" class="scroller"></div>
-        <p class="chart-note">Hover, tap or focus any year to see the complete contribution, tax, take-home, income and balance detail.</p>
+        <p class="chart-note">Balances appear above the line; the annual income-stream payment appears below it in bright blue. Hover, tap or focus any year for complete detail.</p>
         <div id="table" class="scroller" hidden></div>
       </div>
     </section>
@@ -228,7 +228,7 @@
           <li>Bring-forward availability is based on opening total super balance: up to $390,000 below $1.84 million, $260,000 from $1.84 million to below $1.97 million, $130,000 from $1.97 million to below $2.1 million, and nil at or above $2.1 million.</li>
           <li>Current income-stream balance does not determine transfer-balance cap already used. Pension investment growth and ordinary pension payments do not change historical cap usage.</li>
           <li>Voluntary contributions stop from age 75 in the annual model. Compulsory employer contributions continue. The precise 28-day birthday-month window is not modelled.</li>
-          <li>Minimum pension payments use the opening income-stream balance after any scheduled start-of-year addition. Commencement-year pro-rating and fund processing delays are not modelled.</li>
+          <li>When total desired annual income is selected, take-home pay is counted first and only the remaining amount is requested from the income stream, subject to the statutory pension minimum. Minimum pension payments use the opening income-stream balance after any scheduled start-of-year addition. Commencement-year pro-rating and fund processing delays are not modelled.</li>
           <li>The salary-funded target first uses concessional cap space remaining after employer contributions. Any target above that space is treated as an after-tax contribution, subject to available take-home pay and the non-concessional/bring-forward cap. Personal deductible amounts that fail the work test are tested as non-concessional instead.</li>
           <li>Employer contributions above the concessional cap remain excess concessional contributions. The estimate retains them in super after marginal tax is released, and counts them against non-concessional cap space. Additional excess non-concessional tax is outside the model.</li>
           <li>Estimated take-home pay uses 2026–27 resident tax rates plus a full 2% Medicare levy. It excludes offsets, deductions, HELP repayments, Medicare reductions/exemptions and other income.</li>
@@ -490,7 +490,7 @@ function project(parameters = {}) {
     pension += transferredToPension;
     transferBalanceUsed += transferredToPension;
     const transferOmitted = requestedTransfer - transferredToPension;
-    if (transferredToPension > 0) notes.push(`${money(transferredToPension)} commenced as a new retirement-phase income stream at the start of the year.`);
+    if (transferredToPension > 0) notes.push(`${money(transferredToPension)} was transferred as an additional retirement-phase income stream amount at the start of the year.`);
     if (transferOmitted > 0) notes.push(`${money(transferOmitted)} could not be transferred to retirement phase because of available accumulation funds or personal transfer-balance cap space; any accepted outside contribution remains in accumulation.`);
 
     const excessPersonalTax = residentTax2026(taxableSalary + excessEmployer) - residentTax2026(taxableSalary);
@@ -503,9 +503,12 @@ function project(parameters = {}) {
 
     const pensionOpeningForMinimum = pension;
     const minimum = Math.round(pensionOpeningForMinimum * minimumPensionRate(age) / 10) * 10;
-    const desired = p.incomeType === 'minimum' ? minimum
-      : p.incomeType === 'percent' ? pensionOpeningForMinimum * p.incomePercent / 100
-      : p.income * (p.incomeTiming === 'indexed' ? Math.pow(1 + p.wageInflation / 100, index) : 1);
+    const totalDesiredIncome = p.incomeType === 'dollar'
+      ? p.income * (p.incomeTiming === 'indexed' ? Math.pow(1 + p.wageInflation / 100, index) : 1)
+      : takeHomePay + (p.incomeType === 'percent' ? pensionOpeningForMinimum * p.incomePercent / 100 : minimum);
+    const desired = p.incomeType === 'dollar'
+      ? Math.max(0, totalDesiredIncome - takeHomePay)
+      : p.incomeType === 'percent' ? pensionOpeningForMinimum * p.incomePercent / 100 : minimum;
     const targetWithdrawal = Math.max(minimum, desired);
     if (minimum > desired + 0.01) notes.push('Statutory minimum pension exceeds the selected income target.');
 
@@ -541,8 +544,11 @@ function project(parameters = {}) {
     accumulation = Math.max(0, accumulation);
     pension = Math.max(0, pension);
     const closingTotal = accumulation + pension;
-    const shortfall = Math.max(0, desired - withdrawal);
-    if (shortfall > 1) notes.push('Selected pension income was not fully funded.');
+    const spendableIncome = takeHomePay + withdrawal;
+    const shortfall = p.incomeType === 'dollar'
+      ? Math.max(0, totalDesiredIncome - spendableIncome)
+      : Math.max(0, desired - withdrawal);
+    if (shortfall > 1) notes.push(p.incomeType === 'dollar' ? 'Selected total desired income was not fully funded.' : 'Selected income-stream payment was not fully funded.');
     const division296Excluded = openingTotal > RULES.division296Threshold || closingTotal > RULES.division296Threshold;
     if (division296Excluded) warnings.add('The projection excludes Division 296 tax where total super exceeds the fixed $3 million threshold.');
 
@@ -559,7 +565,7 @@ function project(parameters = {}) {
       salarySacrificeConcessional, personalDeductibleConcessional, voluntaryConcessional,
       salaryFundedNccRequested, salaryFundedNccAccepted, salaryFundedNccOmitted,
       ageOrWorkTestRedirect, estimatedPersonalTax, taxableSalary, takeHomePay,
-      spendableIncome: takeHomePay + withdrawal,
+      spendableIncome, totalDesiredIncome,
       contributionsTax, excessEmployer, excessTaxRelease, division293,
       netAccumulationContribution,
       pensionOpeningForMinimum, minimum, desired, withdrawal, shortfall,
@@ -739,7 +745,7 @@ function renderStats() {
   const totalGrowth = last.closingTotal - first.openingTotal;
   byId('stats').innerHTML = `
     <div><span>First-year take-home pay</span><strong>${formatMoney(displayValue(first, 'takeHomePay', 'flow'))}</strong></div>
-    <div><span>Take-home + pension income</span><strong>${formatMoney(displayValue(first, 'spendableIncome', 'flow'))}</strong></div>
+    <div><span>Take-home + income-stream payment</span><strong>${formatMoney(displayValue(first, 'spendableIncome', 'flow'))}</strong></div>
     <div><span>First-year after-tax contribution</span><strong>${formatMoney(displayValue(first, 'salaryFundedNccAccepted', 'flow'))}</strong></div>
     <div><span>Total super · age ${last.age + 1}</span><strong>${formatMoney(displayValue(last, 'closingTotal'))}</strong></div>
     <div><span>Total super growth</span><strong>${formatMoney(displayReal ? displayValue(last, 'closingTotal') - first.openingTotal : totalGrowth)}</strong></div>
@@ -752,6 +758,8 @@ function showTooltip(row, event) {
     ['Gross salary', 'salary', 'flow'],
     ['Estimated personal tax + Medicare', 'estimatedPersonalTax', 'flow'],
     ['Take-home pay after contributions', 'takeHomePay', 'flow'],
+    ['Total desired income', 'totalDesiredIncome', 'flow'],
+    ['Income-stream amount required', 'desired', 'flow'],
     ['Pension income received', 'withdrawal', 'flow'],
     ['Total spendable income', 'spendableIncome', 'flow'],
     ['Opening accumulation', 'openingAccumulation', 'opening'],
@@ -760,7 +768,7 @@ function showTooltip(row, event) {
     ['Voluntary concessional contribution', 'voluntaryConcessional', 'flow'],
     ['Redirected after-tax contribution', 'salaryFundedNccAccepted', 'flow'],
     ['Outside lump sum accepted', 'outsideAccepted', 'flow'],
-    ['New income stream commenced', 'transferredToPension', 'flow'],
+    ['Additional transfer to income stream', 'transferredToPension', 'flow'],
     ['Contributions tax', 'contributionsTax', 'flow'],
     ['Excess contribution tax release', 'excessTaxRelease', 'flow'],
     ['Division 293 estimate', 'division293', 'flow'],
@@ -801,21 +809,21 @@ function renderChart() {
   let svg = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Accumulation, income-stream balance and pension income by financial year">
     <line x1="${left}" x2="${width - right}" y1="${zero}" y2="${zero}" stroke="#0639d8" stroke-width="2"/>
     <text x="8" y="${top + 8}" fill="#0639d8" font-size="12">SUPER</text>
-    <text x="8" y="${zero + 28}" fill="#0639d8" font-size="12">INCOME</text>`;
+    <text x="8" y="${zero + 28}" fill="#00a9ee" font-size="12">INCOME-STREAM PAYMENT</text>`;
   rows.forEach((row, index) => {
     const x = left + index * step + 2;
     const barWidth = Math.max(5, step - 5);
     const accumulationHeight = displayValue(row, 'closingAccumulation') * scale;
     const pensionHeight = displayValue(row, 'closingPension') * scale;
     const incomeHeight = displayValue(row, 'withdrawal', 'flow') * scale;
-    const title = `${row.financialYear}, age ${row.age}: accumulation ${formatMoney(displayValue(row, 'closingAccumulation'))}, income stream ${formatMoney(displayValue(row, 'closingPension'))}, pension income ${formatMoney(displayValue(row, 'withdrawal', 'flow'))}`;
-    svg += `<g tabindex="0" data-i="${index}"><title>${escapeHtml(title)}</title>
+    const ariaLabel = `${row.financialYear}, age ${row.age}: accumulation ${formatMoney(displayValue(row, 'closingAccumulation'))}, income stream ${formatMoney(displayValue(row, 'closingPension'))}, income-stream payment ${formatMoney(displayValue(row, 'withdrawal', 'flow'))}`;
+    svg += `<g tabindex="0" data-i="${index}" role="img" aria-label="${escapeHtml(ariaLabel)}">
       <rect x="${x}" y="${zero - accumulationHeight}" width="${barWidth}" height="${accumulationHeight}" fill="#0639d8"/>
       <rect x="${x}" y="${zero - accumulationHeight - pensionHeight}" width="${barWidth}" height="${pensionHeight}" fill="#32ed67"/>
-      <rect x="${x}" y="${zero}" width="${barWidth}" height="${incomeHeight}" fill="#0639d8" opacity=".72"/>
+      <rect x="${x}" y="${zero}" width="${barWidth}" height="${incomeHeight}" fill="#00a9ee"/>
     </g>`;
     if (index % 3 === 0 || index === rows.length - 1) svg += `<text x="${x + barWidth / 2}" y="${height - 40}" text-anchor="middle" fill="#0639d8" font-size="11">${row.age}</text>`;
-    if (row.transferredToPension > 0) svg += `<circle cx="${x + barWidth / 2}" cy="${Math.max(top, zero - accumulationHeight - pensionHeight - 8)}" r="4" fill="#0639d8"><title>New income stream: ${formatMoney(row.transferredToPension)}</title></circle>`;
+    if (row.transferredToPension > 0) svg += `<circle cx="${x + barWidth / 2}" cy="${Math.max(top, zero - accumulationHeight - pensionHeight - 8)}" r="4" fill="#0639d8" aria-label="Additional transfer to income stream: ${formatMoney(row.transferredToPension)}"/>`;
   });
   svg += `<text x="${left}" y="${height - 12}" fill="#536476" font-size="11">Age at start of financial year · dots mark scheduled income-stream commencements</text></svg>`;
   byId('chart').innerHTML = svg;
@@ -831,11 +839,12 @@ function renderChart() {
 function renderTable() {
   const rows = result.rows;
   byId('table').innerHTML = `<table>
-    <thead><tr><th>Year / age</th><th>Salary</th><th>Take-home pay</th><th>Spendable income</th><th>Opening accumulation</th><th>Opening income stream</th><th>Concessional contribution</th><th>Redirected after-tax contribution</th><th>Outside contribution accepted</th><th>New income stream</th><th>Accumulation earnings</th><th>Income-stream earnings</th><th>Pension income</th><th>Closing accumulation</th><th>Closing income stream</th><th>Cap remaining</th><th>Notes</th></tr></thead>
+    <thead><tr><th>Year / age</th><th>Salary</th><th>Take-home pay</th><th>Total desired income</th><th>Spendable income</th><th>Opening accumulation</th><th>Opening income stream</th><th>Concessional contribution</th><th>Redirected after-tax contribution</th><th>Outside contribution accepted</th><th>Additional income-stream transfer</th><th>Accumulation earnings</th><th>Income-stream earnings</th><th>Income-stream payment</th><th>Closing accumulation</th><th>Closing income stream</th><th>Cap remaining</th><th>Notes</th></tr></thead>
     <tbody>${rows.map(row => `<tr>
       <td>${row.financialYear}<br>age ${row.age}→${row.age + 1}</td>
       <td>${formatMoney(displayValue(row, 'salary', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'takeHomePay', 'flow'))}</td>
+      <td>${formatMoney(displayValue(row, 'totalDesiredIncome', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'spendableIncome', 'flow'))}</td>
       <td>${formatMoney(displayValue(row, 'openingAccumulation', 'opening'))}</td>
       <td>${formatMoney(displayValue(row, 'openingPension', 'opening'))}</td>

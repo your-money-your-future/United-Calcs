@@ -1,6 +1,7 @@
 :root {
   --blue: #0639d8;
   --green: #32ed67;
+  --income-blue: #00a9ee;
   --pale: #f2f6fb;
   --line: #d7e0ea;
   --muted: #536476;
@@ -84,7 +85,7 @@ button { cursor: pointer; }
 .legend i { display: inline-block; width: 11px; height: 11px; margin-right: 6px; vertical-align: -1px; }
 .legend .acc { background: var(--blue); }
 .legend .pen { background: var(--green); border: 1px solid var(--blue); }
-.legend .out { background: var(--blue); opacity: .72; }
+.legend .out { background: var(--income-blue); }
 .scroller { overflow: auto; }
 #chart { border: 1px solid var(--line); background: linear-gradient(180deg,#fff 0,#fff 78%,#f7f9fb 78%); }
 #chart svg { display: block; width: 100%; min-width: 920px; height: 540px; }
