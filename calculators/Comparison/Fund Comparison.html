@@ -201,7 +201,7 @@ function updateOptions(pane) {
         options.forEach(o => {
             const el = document.createElement('option');
             el.value = o.rate;
-            el.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}% p.a.; data ${displayDate(o.effectiveDate)}; ${o.basis})`;
+            el.textContent = `${o.name} ${(o.rate * 100).toFixed(2)}% p.a.`;
             group.appendChild(el);
         });
         select.appendChild(group);
