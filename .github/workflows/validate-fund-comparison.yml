@@ -1,0 +1,29 @@
+name: Validate fund comparison data
+
+on:
+  pull_request:
+    paths:
+      - "calculators/Comparison/**"
+      - "scripts/**fund_comparison*.py"
+      - "tests/test_fund_comparison.py"
+      - ".github/workflows/validate-fund-comparison.yml"
+  push:
+    branches: [main]
+    paths:
+      - "calculators/Comparison/**"
+      - "scripts/**fund_comparison*.py"
+      - "tests/test_fund_comparison.py"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_fund_comparison.py
+      - run: python -m unittest discover -s tests -p "test_*.py"
