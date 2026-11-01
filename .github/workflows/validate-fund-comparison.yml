@@ -6,6 +6,7 @@ on:
       - "calculators/Comparison/**"
       - "scripts/**fund_comparison*.py"
       - "tests/test_fund_comparison.py"
+      - ".gitignore"
       - ".github/workflows/validate-fund-comparison.yml"
   push:
     branches: [main]
