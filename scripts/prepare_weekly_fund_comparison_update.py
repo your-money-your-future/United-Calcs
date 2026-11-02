@@ -29,6 +29,8 @@ def main() -> int:
     parser.add_argument("--report-project", type=Path, required=True)
     parser.add_argument("--report-date", required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--ttr-csv", type=Path, required=True)
+    parser.add_argument("--whole-journey-output", type=Path)
     args = parser.parse_args()
 
     if run("git", "status", "--porcelain", capture=True):
@@ -39,6 +41,7 @@ def main() -> int:
     run("git", "fetch", "origin", "main")
     run("git", "merge", "--ff-only", "origin/main")
     output = args.output or Path(tempfile.gettempdir()) / f"fund-performance-data-{args.report_date}.js"
+    whole_journey_output = args.whole_journey_output or Path(tempfile.gettempdir()) / f"whole-journey-performance-data-{args.report_date}.js"
     run(
         sys.executable,
         "scripts/update_fund_comparison.py",
@@ -50,7 +53,21 @@ def main() -> int:
         str(output),
     )
     run(sys.executable, "scripts/validate_fund_comparison.py", "--feed", str(output))
+    run(
+        sys.executable,
+        "scripts/update_whole_journey.py",
+        "--report-project",
+        str(args.report_project.resolve()),
+        "--report-date",
+        args.report_date,
+        "--ttr-csv",
+        str(args.ttr_csv.resolve()),
+        "--output",
+        str(whole_journey_output),
+    )
+    run(sys.executable, "scripts/validate_whole_journey.py", "--feed", str(whole_journey_output))
     print(output.resolve())
+    print(whole_journey_output.resolve())
     return 0
 
 

@@ -4,16 +4,22 @@ on:
   pull_request:
     paths:
       - "calculators/Comparison/**"
+      - "calculators/The Whole Journey/**"
       - "scripts/**fund_comparison*.py"
+      - "scripts/**whole_journey*.py"
       - "tests/test_fund_comparison.py"
+      - "tests/test_whole_journey.py"
       - ".gitignore"
       - ".github/workflows/validate-fund-comparison.yml"
   push:
     branches: [main]
     paths:
       - "calculators/Comparison/**"
+      - "calculators/The Whole Journey/**"
       - "scripts/**fund_comparison*.py"
+      - "scripts/**whole_journey*.py"
       - "tests/test_fund_comparison.py"
+      - "tests/test_whole_journey.py"
 
 permissions:
   contents: read
@@ -27,4 +33,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: python scripts/validate_fund_comparison.py
+      - run: python scripts/validate_whole_journey.py
       - run: python -m unittest discover -s tests -p "test_*.py"

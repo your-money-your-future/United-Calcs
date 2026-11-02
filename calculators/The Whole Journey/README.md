@@ -4,12 +4,15 @@ This package contains the current Lifetime Journey Calculator with the approved 
 
 ## Upload to GitHub
 
-Upload both files to the calculator's existing GitHub folder:
+Upload these files to the calculator's existing GitHub folder:
 
-- `index.html`
+- `Superannuation Lifetime Projection.html`
 - `shared-theme.css`
+- `whole-journey-performance-data.js`
 
-Keep the two files in the same folder. The stylesheet is linked with the relative path `shared-theme.css`.
+Keep the files in the same folder. The stylesheet and generated performance feed are linked with relative paths.
+
+The calculator also loads `whole-journey-performance-data.js`. This generated file is updated from the verified weekly report and the matching official Cbus TTR source. It keeps accumulation, TTR and fully retired returns separate and includes every available annualised period. Do not edit it by hand.
 
 The existing Supabase authentication guard and `../../index.html` dashboard route are preserved. The calculator should therefore remain two folder levels below the dashboard, matching the current setup.
 
