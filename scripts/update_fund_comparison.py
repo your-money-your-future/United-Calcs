@@ -25,7 +25,7 @@ FUND_IDS = {
     "Cbus": "cbus",
     "HESTA": "hesta",
     "Hostplus": "hostplus",
-    "MLC MasterKey Fundamentals": "mlc",
+    "Plum Super": "plum",
     "Rest": "rest",
     "UniSuper": "unisuper",
 }
