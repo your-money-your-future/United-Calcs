@@ -36,6 +36,7 @@ def validate(feed: dict, html: str) -> None:
     require(feed.get("fund") == "Cbus", "Whole Journey feed must contain Cbus data")
     phases = feed.get("phases", {})
     require(set(phases) == {"accumulation", "ttr", "retired"}, "feed must contain exactly three phases")
+    require(phases["accumulation"].get("effectiveDates") == phases["ttr"].get("effectiveDates") == phases["retired"].get("effectiveDates"), "phase reference dates do not match")
     for phase_name, phase in phases.items():
         require(len(phase.get("options", [])) == 11, f"{phase_name} must contain 11 options")
         require(phase.get("effectiveDates"), f"{phase_name} effective dates are missing")

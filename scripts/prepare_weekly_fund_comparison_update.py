@@ -29,9 +29,17 @@ def main() -> int:
     parser.add_argument("--report-project", type=Path, required=True)
     parser.add_argument("--report-date", required=True)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--ttr-csv", type=Path, required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--ttr-csv", type=Path)
+    source.add_argument("--ttr-html", type=Path)
+    parser.add_argument("--ttr-source-url")
     parser.add_argument("--whole-journey-output", type=Path)
     args = parser.parse_args()
+
+    if bool(args.ttr_html) != bool(args.ttr_source_url):
+        parser.error("--ttr-html requires --ttr-source-url; CSV must not specify it")
+    source_args = (["--ttr-html", str(args.ttr_html.resolve()), "--ttr-source-url", args.ttr_source_url]
+                   if args.ttr_html else ["--ttr-csv", str(args.ttr_csv.resolve())])
 
     if run("git", "status", "--porcelain", capture=True):
         raise SystemExit("refusing to prepare an update from a dirty calculator checkout")
@@ -60,8 +68,7 @@ def main() -> int:
         str(args.report_project.resolve()),
         "--report-date",
         args.report_date,
-        "--ttr-csv",
-        str(args.ttr_csv.resolve()),
+        *source_args,
         "--output",
         str(whole_journey_output),
     )

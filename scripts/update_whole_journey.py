@@ -5,6 +5,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import calendar
+from html.parser import HTMLParser
+from urllib.parse import urlparse
 import hashlib
 import json
 import re
@@ -107,6 +110,115 @@ def ttr_rows(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+class TTRTableParser(HTMLParser):
+    """Read only the monthly table beneath the exact TTR heading."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.heading = None
+        self.active = False
+        self.matches = 0
+        self.paragraph = None
+        self.paragraphs = []
+        self.in_table = False
+        self.tables = []
+        self.table = []
+        self.row = []
+        self.cell = None
+        self.sup_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "sup":
+            self.sup_depth += 1
+        if tag == "h2":
+            self.active = False
+            self.heading = []
+        elif self.active:
+            if tag == "p" and not self.tables and not self.in_table:
+                self.paragraph = []
+            elif tag == "table":
+                require(not self.in_table, "nested TTR tables are not supported")
+                self.in_table = True
+                self.table = []
+            elif self.in_table and tag == "tr":
+                self.row = []
+            elif self.in_table and tag in {"th", "td"}:
+                self.cell = []
+
+    def handle_data(self, data):
+        if self.sup_depth:
+            return
+        for target in (self.heading, self.paragraph, self.cell):
+            if target is not None:
+                target.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "sup":
+            self.sup_depth = max(0, self.sup_depth - 1)
+        elif tag == "h2" and self.heading is not None:
+            self.active = " ".join("".join(self.heading).split()) == "Transition to Retirement investment performance"
+            self.matches += int(self.active)
+            self.heading = None
+        elif self.active:
+            if tag == "p" and self.paragraph is not None:
+                self.paragraphs.append(" ".join("".join(self.paragraph).split()))
+                self.paragraph = None
+            elif self.in_table and tag in {"th", "td"} and self.cell is not None:
+                self.row.append(" ".join("".join(self.cell).split()))
+                self.cell = None
+            elif self.in_table and tag == "tr":
+                self.table.append(self.row)
+            elif tag == "table" and self.in_table:
+                self.tables.append(self.table)
+                self.in_table = False
+
+
+def ttr_html_rows(path: Path, source_url: str) -> list[dict[str, Any]]:
+    url = urlparse(source_url)
+    require(url.scheme == "https" and url.hostname in {"cbussuper.com.au", "www.cbussuper.com.au"}
+            and url.path.rstrip("/") == "/investments/investment-performance"
+            and not url.username and not url.password and url.port in {None, 443},
+            "TTR HTML must come from the official Cbus investment performance page")
+    parser = TTRTableParser()
+    parser.feed(path.read_text(encoding="utf-8"))
+    parser.close()
+    require(parser.matches == 1 and len(parser.tables) == 1, "expected exactly one TTR heading and monthly table")
+    dates = [re.fullmatch(r"To\s+(\d{1,2}\s+[A-Za-z]+\s+\d{4})", text) for text in parser.paragraphs]
+    dates = [match for match in dates if match]
+    require(len(dates) == 1, "TTR monthly reference date missing or ambiguous")
+    effective_date = datetime.strptime(dates[0].group(1), "%d %B %Y").date()
+    require(effective_date.day == calendar.monthrange(effective_date.year, effective_date.month)[1],
+            "TTR reference date must be month end")
+    table = parser.tables[0]
+    require(len(table) == 12, "TTR monthly table must contain exactly 11 options")
+    headers = table[0]
+    require(len(headers) in {7, 8} and not headers[0], "unexpected TTR table schema")
+    columns = {}
+    ignored = set()
+    for index, header in enumerate(headers[1:], 1):
+        normalised = re.sub(r"[().%\s]", "", header).lower()
+        if normalised in {"1month", "financialyeartodate"}:
+            require(normalised not in ignored, "duplicate TTR column")
+            ignored.add(normalised)
+            continue
+        match = re.fullmatch(r"(1year|(?:3|5|7|10)yearspa)", normalised)
+        require(match is not None, f"unrecognised TTR column: {header}")
+        years = int(re.match(r"\d+", normalised).group())
+        require(years not in columns, "duplicate TTR annualised column")
+        columns[years] = index
+    require(set(columns) in ({1, 3, 5, 7}, {1, 3, 5, 7, 10})
+            and ignored == {"1month", "financialyeartodate"}, "missing TTR columns")
+    rows = []
+    for values in table[1:]:
+        require(len(values) == len(headers), "malformed TTR row")
+        row = {"option": normalise_option(values[0]), "effective_date": effective_date.isoformat(), "basis": "Published"}
+        for field, years in PERIODS:
+            row[field] = parse_percent(values[columns[years]]) if years in columns else None
+        rows.append(row)
+    phase_payload(rows, values_are_percent=False)  # Reject duplicates, blank names and missing returns.
+    return rows
+
+
 def phase_payload(rows: list[dict[str, Any]], *, values_are_percent: bool) -> dict[str, Any]:
     options: list[dict[str, Any]] = []
     names: set[str] = set()
@@ -139,7 +251,7 @@ def phase_payload(rows: list[dict[str, Any]], *, values_are_percent: bool) -> di
     }
 
 
-def build_feed(manifest: dict[str, Any], canonical: dict[str, Any], ttr_source: Path) -> dict[str, Any]:
+def build_feed(manifest: dict[str, Any], canonical: dict[str, Any], ttr_source: Path, *, ttr_source_url: str | None = None) -> dict[str, Any]:
     report_date = str(manifest["report_date"])
     require(canonical.get("report_date") == report_date, "canonical report date does not match manifest")
     funds = canonical.get("funds")
@@ -150,7 +262,7 @@ def build_feed(manifest: dict[str, Any], canonical: dict[str, Any], ttr_source: 
     require(not cbus.get("source_unavailable"), "Cbus source is unavailable in this report")
     accumulation = phase_payload(cbus.get("accumulation", []), values_are_percent=True)
     retired = phase_payload(cbus.get("retirement", []), values_are_percent=True)
-    ttr = phase_payload(ttr_rows(ttr_source), values_are_percent=False)
+    ttr = phase_payload(ttr_html_rows(ttr_source, ttr_source_url) if ttr_source_url else ttr_rows(ttr_source), values_are_percent=False)
     require(
         set(accumulation["effectiveDates"]) == set(retired["effectiveDates"]) == set(ttr["effectiveDates"]),
         "Cbus accumulation, TTR and fully retired source months do not match",
@@ -163,6 +275,7 @@ def build_feed(manifest: dict[str, Any], canonical: dict[str, Any], ttr_source: 
         "fund": "Cbus",
         "sourceId": cbus.get("source_id"),
         "ttrSourceSha256": sha256(ttr_source),
+        **({"ttrSourceUrl": ttr_source_url, "ttrSourceFormat": "html"} if ttr_source_url else {}),
         "methodology": "Published Cbus crediting rates; all available annualised periods; phases kept separate",
         "phases": {"accumulation": accumulation, "ttr": ttr, "retired": retired},
     }
@@ -182,7 +295,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--report-project", type=Path, required=True)
     parser.add_argument("--report-date", required=True)
-    parser.add_argument("--ttr-csv", type=Path, required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--ttr-csv", type=Path)
+    source.add_argument("--ttr-html", type=Path)
+    parser.add_argument("--ttr-source-url")
     parser.add_argument("--output", type=Path, default=OUTPUT)
     args = parser.parse_args()
     require(bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.report_date)), "invalid report date")
@@ -190,7 +306,8 @@ def main() -> int:
     manifest = load_json(project / "state" / f"{args.report_date}.json")
     canonical = load_json(project / "data" / "runs" / args.report_date / "canonical.json")
     validate_manifest(project, manifest, args.report_date)
-    feed = build_feed(manifest, canonical, args.ttr_csv.resolve())
+    require(bool(args.ttr_html) == bool(args.ttr_source_url), "--ttr-html requires --ttr-source-url; CSV must not specify it")
+    feed = build_feed(manifest, canonical, (args.ttr_html or args.ttr_csv).resolve(), ttr_source_url=args.ttr_source_url)
     write_feed(feed, args.output)
     print(f"Updated {args.output} from verified report {args.report_date}: 3 Cbus phases")
     return 0
